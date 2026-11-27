@@ -424,11 +424,11 @@ export default function CalculatorPage() {
           </div>
 
           {/* Main 2-Column Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-7 items-start">
             {/* LEFT COLUMN: Inputs */}
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Ad budget & Ticket Size Card */}
-              <section className={`rounded-2xl border p-5 space-y-4.5 ${cardBg}`}>
+              <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="text-lg font-bold">
                     {knowMode === "budget" ? "Ad budget" : "Disbursal target"}
@@ -779,22 +779,22 @@ export default function CalculatorPage() {
           </div>
 
           {/* Right Column: Hero Output, Gauge, KPIs, Best Mix, Channel Comparison, Chart */}
-          <div className="space-y-4">
+          <div className="space-y-5">
           {/* Hero Output Card */}
           <section
-            className="rounded-2xl border p-5 sm:p-6 bg-gradient-to-br from-card to-secondary/80 border-mint/25"
+            className="rounded-2xl border p-6 sm:p-7 lg:p-8 bg-gradient-to-br from-card to-secondary/80 border-mint/25 flex flex-col justify-center"
           >
-            <p className={`text-xs sm:text-sm mb-1.5 ${mutedText}`}>
+            <p className={`text-sm sm:text-base font-medium mb-2.5 ${mutedText}`}>
               {knowMode === "budget"
                 ? `Disbursed per month on ${formatCurrency(totals.budgetDay)} a day`
                 : `Ad budget needed per day to disburse ${formatINRCompact(targetDisbursalMonth)} a month`}
             </p>
-            <div className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-mono text-[#4ade80] mb-2 leading-none">
+            <div className="text-4xl sm:text-5xl lg:text-[50px] font-extrabold font-mono text-[#4ade80] my-1 leading-tight tracking-tight">
               {knowMode === "budget"
                 ? formatINRCompact(totals.amountDisbursedMonth)
                 : formatCurrency(Math.round(totals.budgetDay))}
             </div>
-            <p className="text-xs sm:text-sm font-medium">
+            <p className="text-sm sm:text-base font-semibold text-foreground/95 mt-2">
               {knowMode === "budget" ? (
                 <>
                   {formatIN(Math.round(totals.loansDisbursed))} loans from{" "}
