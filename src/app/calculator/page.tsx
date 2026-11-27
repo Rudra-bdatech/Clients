@@ -400,11 +400,11 @@ export default function CalculatorPage() {
           </div>
 
           {/* Main 2-Column Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6 items-start">
             {/* LEFT COLUMN: Inputs */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Ad budget & Ticket Size Card */}
-              <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
+              <section className={`rounded-2xl border p-5 space-y-4.5 ${cardBg}`}>
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="text-lg font-bold">
                     {knowMode === "budget" ? "Ad budget" : "Disbursal target"}
@@ -546,7 +546,7 @@ export default function CalculatorPage() {
                 }`}
               >
             {(channelMode === "google" || channelMode === "both") && (
-              <div className={`rounded-2xl border p-5 space-y-4 ${cardBg}`}>
+              <div className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 ${cardBg}`}>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#4ade80]" />
                   <h2 className="font-bold text-base">Google Ads</h2>
@@ -627,7 +627,7 @@ export default function CalculatorPage() {
             )}
 
             {(channelMode === "meta" || channelMode === "both") && (
-              <div className={`rounded-2xl border p-5 space-y-4 ${cardBg}`}>
+              <div className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 ${cardBg}`}>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
                   <h2 className="font-bold text-base">Meta Ads</h2>
@@ -707,29 +707,29 @@ export default function CalculatorPage() {
               </div>
             )}
           </section>
-
-          {/* Right Column: Hero Output, Gauge, KPIs, Best Mix, Channel Comparison, Chart, Benchmarks */}
           </div>
-          <div className="space-y-6">
+
+          {/* Right Column: Hero Output, Gauge, KPIs, Best Mix, Channel Comparison, Chart */}
+          <div className="space-y-4">
           {/* Hero Output Card */}
           <section
-            className={`rounded-2xl border p-6 sm:p-8 ${
+            className={`rounded-2xl border p-5 sm:p-6 ${
               dark
                 ? "bg-gradient-to-br from-[#0e1c26] to-[#0f172a] border-emerald-500/25"
                 : "bg-emerald-50/70 border-emerald-200"
             }`}
           >
-            <p className={`text-xs sm:text-sm mb-2 ${mutedText}`}>
+            <p className={`text-xs sm:text-sm mb-1.5 ${mutedText}`}>
               {knowMode === "budget"
                 ? `Disbursed per month on ${formatCurrency(totals.budgetDay)} a day`
                 : `Required monthly ad budget for ${formatINRCompact(totals.amountDisbursedMonth)} disbursal`}
             </p>
-            <div className="text-4xl sm:text-5xl font-extrabold font-mono text-[#4ade80] mb-3">
+            <div className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-mono text-[#4ade80] mb-2 leading-none">
               {knowMode === "budget"
                 ? formatINRCompact(totals.amountDisbursedMonth)
                 : formatINRCompact(totals.budgetMonth)}
             </div>
-            <p className="text-sm font-medium">
+            <p className="text-xs sm:text-sm font-medium">
               {formatIN(Math.round(totals.loansDisbursed))} loans from{" "}
               {formatIN(Math.round(totals.leadsDay))} leads a day ·{" "}
               {formatCurrency(Math.round(totals.costPerDisbursedLoan))} per loan
@@ -737,17 +737,17 @@ export default function CalculatorPage() {
           </section>
 
           {/* Disbursement % Benchmark Gauge */}
-          <section className={`rounded-2xl border p-5 sm:p-6 space-y-4 ${cardBg}`}>
+          <section className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 ${cardBg}`}>
             <p className={`text-xs sm:text-sm ${mutedText}`}>
               Disbursement % (ad spend × 100 ÷ amount disbursed)
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
               <div
-                className={`inline-flex items-center gap-3 rounded-xl border px-4 py-2 font-mono font-bold text-lg ${inputBg}`}
+                className={`inline-flex items-center gap-3 rounded-xl border px-3.5 py-1.5 font-mono font-bold text-base sm:text-lg ${inputBg}`}
               >
                 <span>{totals.disbursementPct.toFixed(2)}</span>
-                <span className={`text-sm ${mutedText}`}>%</span>
+                <span className={`text-xs sm:text-sm ${mutedText}`}>%</span>
               </div>
 
               <span
@@ -778,7 +778,7 @@ export default function CalculatorPage() {
           </section>
 
           {/* 6 KPI Stat Cards */}
-          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               {
                 label: "Leads per day",
@@ -807,9 +807,9 @@ export default function CalculatorPage() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className={`rounded-2xl border p-4 sm:p-5 ${cardBg}`}
+                className={`rounded-2xl border p-3.5 sm:p-4 ${cardBg}`}
               >
-                <div className={`text-xs mb-1.5 ${mutedText}`}>{stat.label}</div>
+                <div className={`text-xs mb-1 ${mutedText}`}>{stat.label}</div>
                 <div className="text-xl sm:text-2xl font-extrabold font-mono">
                   {stat.value}
                 </div>
@@ -819,8 +819,8 @@ export default function CalculatorPage() {
 
           {/* Best Mix Optimization Banner */}
           {bestMix && (
-            <section className="rounded-2xl border border-emerald-500/35 bg-emerald-500/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <p className="text-sm leading-relaxed">
+            <section className="rounded-2xl border border-emerald-500/35 bg-emerald-500/5 p-4 sm:p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <p className="text-xs sm:text-sm leading-relaxed">
                 Best mix:{" "}
                 <strong className="text-[#4ade80]">
                   Google {bestMix.googleSplit}% / Meta {bestMix.metaSplit}%
@@ -841,7 +841,7 @@ export default function CalculatorPage() {
 
           {/* Channel Comparison Cards */}
           {channelMode === "both" && (
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
                 {
                   key: "google" as const,
@@ -860,7 +860,7 @@ export default function CalculatorPage() {
                 return (
                   <div
                     key={ch.key}
-                    className={`rounded-2xl border p-5 space-y-3 ${
+                    className={`rounded-2xl border p-4 sm:p-5 space-y-2.5 ${
                       isBest
                         ? `${cardBg} border-[#4ade80]/60`
                         : cardBg
@@ -912,7 +912,7 @@ export default function CalculatorPage() {
           )}
 
           {/* Horizontal Grouped Bar Chart (directly on page background, no card box) */}
-          <section className="pt-2 space-y-5">
+          <section className="pt-2 space-y-4">
             <div className="flex items-center gap-5 text-xs font-semibold">
               {(channelMode === "google" || channelMode === "both") && (
                 <span className="inline-flex items-center gap-2">
@@ -928,7 +928,7 @@ export default function CalculatorPage() {
               )}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {[
                 {
                   stage: "Leads",
@@ -953,13 +953,13 @@ export default function CalculatorPage() {
               ].map((row) => (
                 <div
                   key={row.stage}
-                  className="grid grid-cols-[90px_1fr] sm:grid-cols-[100px_1fr] items-center gap-3"
+                  className="grid grid-cols-[80px_1fr] sm:grid-cols-[90px_1fr] items-center gap-3"
                 >
                   <span className={`text-xs ${mutedText}`}>{row.stage}</span>
                   <div className="space-y-1.5">
                     {(channelMode === "google" || channelMode === "both") && (
                       <div
-                        className="h-6 min-w-fit rounded-md bg-[#4ade80] text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
+                        className="h-6 min-w-[52px] rounded-md bg-[#4ade80] text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
                         style={{
                           width: `${Math.max(8, (row.g / maxChartValue) * 100)}%`,
                         }}
@@ -969,7 +969,7 @@ export default function CalculatorPage() {
                     )}
                     {(channelMode === "meta" || channelMode === "both") && (
                       <div
-                        className="h-6 min-w-fit rounded-md bg-blue-400 text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
+                        className="h-6 min-w-[52px] rounded-md bg-blue-400 text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
                         style={{
                           width: `${Math.max(8, (row.m / maxChartValue) * 100)}%`,
                         }}
