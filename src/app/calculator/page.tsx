@@ -236,7 +236,7 @@ export default function CalculatorPage() {
   // Best mix optimizer: tries every split from 0% to 100% in 5% steps
   // (matching Claude Artifact specification)
   const bestMix = useMemo(() => {
-    if (channelMode !== "both" || totalBudgetMonth <= 0) return null;
+    if (knowMode !== "budget" || channelMode !== "both" || totalBudgetMonth <= 0) return null;
     let bestG = effectiveGoogleSplit;
     let bestCost = totals.costPerDisbursedLoan;
 
@@ -783,17 +783,30 @@ export default function CalculatorPage() {
             <p className={`text-xs sm:text-sm mb-1.5 ${mutedText}`}>
               {knowMode === "budget"
                 ? `Disbursed per month on ${formatCurrency(totals.budgetDay)} a day`
-                : `Required monthly ad budget for ${formatINRCompact(totals.amountDisbursedMonth)} disbursal`}
+                : `Ad budget needed per day to disburse ${formatINRCompact(targetDisbursalMonth)} a month`}
             </p>
             <div className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold font-mono text-[#4ade80] mb-2 leading-none">
               {knowMode === "budget"
                 ? formatINRCompact(totals.amountDisbursedMonth)
-                : formatINRCompact(totals.budgetMonth)}
+                : formatCurrency(Math.round(totals.budgetDay))}
             </div>
             <p className="text-xs sm:text-sm font-medium">
-              {formatIN(Math.round(totals.loansDisbursed))} loans from{" "}
-              {formatIN(Math.round(totals.leadsDay))} leads a day ·{" "}
-              {formatCurrency(Math.round(totals.costPerDisbursedLoan))} per loan
+              {knowMode === "budget" ? (
+                <>
+                  {formatIN(Math.round(totals.loansDisbursed))} loans from{" "}
+                  {formatIN(Math.round(totals.leadsDay))} leads a day ·{" "}
+                  {formatCurrency(Math.round(totals.costPerDisbursedLoan))} per loan
+                </>
+              ) : (
+                <>
+                  {Math.round(totals.budgetMonth) === 100000
+                    ? "₹1,00,000 a month"
+                    : `${formatINRCompact(totals.budgetMonth)} a month`}{" "}
+                  · {formatIN(Math.round(totals.leadsDay))} leads a day ·{" "}
+                  {formatIN(Math.round(totals.loansDisbursed))} loans ·{" "}
+                  {formatCurrency(Math.round(totals.costPerDisbursedLoan))} per loan
+                </>
+              )}
             </p>
           </section>
 
@@ -893,7 +906,10 @@ export default function CalculatorPage() {
               },
               {
                 label: "Blended CPL",
-                value: formatCurrency(totals.blendedCpl, 2),
+                value: formatCurrency(
+                  totals.blendedCpl,
+                  totals.blendedCpl % 1 !== 0 ? 2 : 0
+                ),
               },
             ].map((stat) => (
               <div
@@ -977,7 +993,7 @@ export default function CalculatorPage() {
                         label: "CPL",
                         val: formatCurrency(
                           ch.m.effectiveCpl,
-                          ch.m.effectiveCpl % 1 !== 0 ? 2 : 0
+                          ch.m.effectiveCpl % 1 === 0 ? 0 : ch.m.effectiveCpl * 10 % 1 === 0 ? 1 : 2
                         ),
                       },
                       {
