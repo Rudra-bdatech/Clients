@@ -32,21 +32,21 @@
   --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
-  --primary: 142 69% 40%;
+  --primary: 158 64% 36%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 93%;
+  --secondary: 214 32% 95%;
   --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 90%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 88%;
-  --accent-foreground: 222 47% 11%;
+  --muted: 214 32% 91%;
+  --muted-foreground: 215 19% 36%;
+  --accent: 158 64% 94%;
+  --accent-foreground: 158 64% 28%;
   --destructive: 0 84% 50%;
   --destructive-foreground: 0 0% 100%;
-  --border: 214 32% 86%;
-  --input: 214 32% 86%;
-  --ring: 142 69% 40%;
-  --mint: 142 69% 38%;
-  --mint-glow: 142 69% 45%;
+  --border: 214 32% 88%;
+  --input: 214 32% 88%;
+  --ring: 158 64% 36%;
+  --mint: 158 64% 36%;
+  --mint-glow: 158 64% 45%;
 }
 
 @theme inline {
@@ -113,6 +113,136 @@
   background: #0f1729cc;
   backdrop-filter: blur(20px);
   border: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* ── Light Mode Glass & Elevation Overrides ── */
+.light .glass {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+}
+
+.light .glass.text-left {
+  border-left: 4px solid #059669;
+}
+
+.light .glass-strong {
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.08), 0 8px 16px -4px rgba(15, 23, 42, 0.04);
+}
+
+.light .text-gradient {
+  background-image: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.light .bg-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+}
+
+.light .bg-secondary\/50,
+.light .bg-secondary {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Light mode overrides for green highlights to rich emerald */
+.light .text-\[\#4ade80\] {
+  color: #059669;
+}
+
+.light .bg-\[\#4ade80\] {
+  background-color: #059669;
+  color: #ffffff;
+}
+
+/* Light mode sliders */
+.light .calc-slider {
+  background: linear-gradient(
+    to right,
+    #059669 0%,
+    #059669 var(--slider-pct, 50%),
+    #e2e8f0 var(--slider-pct, 50%),
+    #e2e8f0 100%
+  );
+}
+
+.light .calc-slider::-webkit-slider-thumb {
+  background: #059669;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(5, 150, 105, 0.25);
+}
+
+.light .calc-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 7px rgba(5, 150, 105, 0.4);
+}
+
+.light .calc-slider::-moz-range-thumb {
+  background: #059669;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(5, 150, 105, 0.25);
+}
+
+.light .calc-slider::-moz-range-track {
+  background: #e2e8f0;
+}
+
+.light .calc-slider::-moz-range-progress {
+  background: #059669;
+}
+
+.light .calc-gauge {
+  background: linear-gradient(
+    to right,
+    var(--gauge-color, #dc2626) 0%,
+    var(--gauge-color, #dc2626) var(--gauge-pct, 50%),
+    #e2e8f0 var(--gauge-pct, 50%),
+    #e2e8f0 100%
+  );
+}
+
+.light .calc-gauge::-webkit-slider-thumb {
+  background: #ffffff;
+  border: 2px solid #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+.light .calc-gauge::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.4);
+}
+
+.light .calc-gauge::-moz-range-thumb {
+  background: #ffffff;
+  border: 2px solid #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+.light .calc-gauge::-moz-range-track {
+  background: #e2e8f0;
+}
+
+.light .calc-gauge::-moz-range-progress {
+  background: var(--gauge-color, #dc2626);
+}
+
+@keyframes pulse-glow-light {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(5, 150, 105, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(5, 150, 105, 0.55);
+  }
+}
+
+.light .cta-glow {
+  animation: pulse-glow-light 2s ease-in-out infinite;
+}
+
+.light .cta-glow:hover {
+  animation: none;
+  box-shadow: 0 0 30px rgba(5, 150, 105, 0.65);
 }
 
 @keyframes pulse-glow {
