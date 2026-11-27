@@ -797,7 +797,7 @@ export default function CalculatorPage() {
               >
                 <input
                   type="number"
-                  min={0.1}
+                  min={1}
                   max={100}
                   step={0.1}
                   value={
@@ -827,17 +827,22 @@ export default function CalculatorPage() {
             <div className="relative flex items-center">
               <input
                 type="range"
-                min={0.5}
+                min={1}
                 max={20}
                 step={0.1}
-                value={Math.min(20, Math.max(0.5, totals.disbursementPct))}
+                value={Math.min(20, Math.max(1, totals.disbursementPct))}
                 onChange={(e) => handleGaugeChange(Number(e.target.value))}
                 aria-label="Disbursement % gauge"
                 className="calc-gauge w-full"
                 style={{
                   "--gauge-pct": `${Math.min(
                     100,
-                    (Math.min(20, totals.disbursementPct) / 20) * 100
+                    Math.max(
+                      0,
+                      ((Math.min(20, Math.max(1, totals.disbursementPct)) - 1) /
+                        19) *
+                        100
+                    )
                   )}%`,
                   "--gauge-color": isAboveBenchmark ? "#ef4444" : "#4ade80",
                 } as React.CSSProperties}
@@ -845,7 +850,7 @@ export default function CalculatorPage() {
               <div
                 className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-0.5 h-3.5 bg-white/70 rounded-full"
                 style={{
-                  left: `${(benchmarks.disbursementPct / 20) * 100}%`,
+                  left: `${((benchmarks.disbursementPct - 1) / 19) * 100}%`,
                 }}
               />
             </div>
