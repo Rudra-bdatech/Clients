@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -16,6 +17,8 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme !== "light";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-background/80 backdrop-blur-md">
@@ -27,7 +30,7 @@ export function Navbar() {
           CLIENTS<span className="text-mint">.</span>
         </Link>
 
-        <nav aria-label="Primary" className="flex items-center">
+        <nav aria-label="Primary" className="flex items-center gap-3">
           <ul className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
@@ -48,6 +51,20 @@ export function Navbar() {
               );
             })}
           </ul>
+
+          {/* Universal theme toggle — desktop */}
+          <button
+            type="button"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="hidden md:inline-flex items-center justify-center w-9 h-9 rounded-full border border-border bg-secondary/50 text-muted-foreground hover:text-mint hover:border-mint/40 transition-colors cursor-pointer"
+          >
+            {isDark ? (
+              <Sun className="w-4 h-4" aria-hidden="true" />
+            ) : (
+              <Moon className="w-4 h-4" aria-hidden="true" />
+            )}
+          </button>
 
           <button
             type="button"
@@ -72,6 +89,28 @@ export function Navbar() {
           aria-label="Mobile"
           className="md:hidden mt-3 pt-3 border-t border-border/50 max-w-6xl mx-auto"
         >
+          {/* Theme toggle — mobile */}
+          <div className="flex items-center justify-between px-3 pb-2">
+            <span className="text-xs font-mono text-muted-foreground">Theme</span>
+            <button
+              type="button"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-secondary/50 text-xs text-muted-foreground hover:text-mint hover:border-mint/40 transition-colors cursor-pointer"
+            >
+              {isDark ? (
+                <>
+                  <Sun className="w-3.5 h-3.5" aria-hidden="true" />
+                  Light
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5" aria-hidden="true" />
+                  Dark
+                </>
+              )}
+            </button>
+          </div>
           <ul className="flex flex-col gap-2 pb-2">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;

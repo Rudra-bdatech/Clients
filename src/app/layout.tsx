@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { LenisProvider } from "@/components/LenisProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -37,9 +38,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${jakarta.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-mint/30 selection:text-foreground">
-        <LenisProvider>{children}</LenisProvider>
+        <ThemeProvider>
+          <LenisProvider>{children}</LenisProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
