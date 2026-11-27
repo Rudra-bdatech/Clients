@@ -73,13 +73,14 @@ function formatCurrency(amount: number, decimals = 0): string {
 
 function computeChannelMetrics(budgetMonth: number, ch: ChannelInputs, ticketSize: number) {
   const safeCpl = Math.max(1, ch.cpl);
-  const leadsMonth = budgetMonth / safeCpl;
-  const leadsDay = leadsMonth / DAYS_PER_MONTH;
-  const completedApps = leadsMonth * (ch.completedPct / 100);
-  const approvedLeads = leadsMonth * (ch.approvedPct / 100);
+  const leadsMonth = Math.round(budgetMonth / safeCpl);
+  const leadsDay = Math.round(leadsMonth / DAYS_PER_MONTH);
+  const completedApps = Math.round(leadsMonth * (ch.completedPct / 100));
+  const approvedLeads = Math.round(leadsMonth * (ch.approvedPct / 100));
   const loansDisbursed = leadsMonth * (ch.disbursedPct / 100);
   const amountDisbursedMonth = loansDisbursed * ticketSize;
   const amountDisbursedDay = amountDisbursedMonth / DAYS_PER_MONTH;
+  const effectiveCpl = leadsMonth > 0 ? budgetMonth / leadsMonth : safeCpl;
   const costPerQualifiedLead =
     approvedLeads > 0 ? budgetMonth / approvedLeads : 0;
   const costPerDisbursedLoan =
@@ -91,6 +92,7 @@ function computeChannelMetrics(budgetMonth: number, ch: ChannelInputs, ticketSiz
     budgetMonth,
     budgetDay: budgetMonth / DAYS_PER_MONTH,
     cpl: ch.cpl,
+    effectiveCpl,
     leadsMonth,
     leadsDay,
     completedApps,
@@ -271,17 +273,32 @@ export default function CalculatorPage() {
   const gMaxCpl = ticketSize * (google.disbursedPct / 100) * benchRatio;
   const gMinDisbPct =
     ticketSize * benchRatio > 0
-      ? (google.cpl * 100) / (ticketSize * benchRatio)
+      ? (gMetrics.effectiveCpl * 100) / (ticketSize * benchRatio)
       : 0;
   const mMaxCpl = ticketSize * (meta.disbursedPct / 100) * benchRatio;
   const mMinDisbPct =
     ticketSize * benchRatio > 0
-      ? (meta.cpl * 100) / (ticketSize * benchRatio)
+      ? (mMetrics.effectiveCpl * 100) / (ticketSize * benchRatio)
       : 0;
   const mTargetTicket =
     (meta.disbursedPct / 100) * benchRatio > 0
       ? meta.cpl / ((meta.disbursedPct / 100) * benchRatio)
       : 0;
+
+  // Gauge reverse-calculation matching Claude Artifact:
+  // sets disbursedPct on channels inversely proportional to target disbursement ratio
+  const handleGaugeChange = (targetDisbPct: number) => {
+    if (targetDisbPct <= 0 || ticketSize <= 0) return;
+    const targetD = targetDisbPct / 100;
+    const newG = parseFloat(
+      ((gMetrics.effectiveCpl * 100) / (ticketSize * targetD)).toFixed(2)
+    );
+    const newM = parseFloat(
+      ((mMetrics.effectiveCpl * 100) / (ticketSize * targetD)).toFixed(2)
+    );
+    setGoogle((prev) => ({ ...prev, disbursedPct: newG }));
+    setMeta((prev) => ({ ...prev, disbursedPct: newM }));
+  };
 
   // Theme classes — static design tokens (global theme handled by Navbar toggle)
   const pageBg = "bg-background text-foreground";
@@ -742,9 +759,21 @@ export default function CalculatorPage() {
 
             <div className="flex flex-wrap items-center gap-3">
               <div
-                className={`inline-flex items-center gap-3 rounded-xl border px-3.5 py-1.5 font-mono font-bold text-base sm:text-lg ${inputBg}`}
+                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 font-mono font-bold text-base sm:text-lg ${inputBg}`}
               >
-                <span>{totals.disbursementPct.toFixed(2)}</span>
+                <input
+                  type="number"
+                  min={0.1}
+                  max={100}
+                  step={0.1}
+                  value={
+                    totals.disbursementPct > 0
+                      ? parseFloat(totals.disbursementPct.toFixed(2))
+                      : ""
+                  }
+                  onChange={(e) => handleGaugeChange(Number(e.target.value))}
+                  className="w-16 bg-transparent text-right font-mono font-bold text-base sm:text-lg focus:outline-none"
+                />
                 <span className={`text-xs sm:text-sm ${mutedText}`}>%</span>
               </div>
 
@@ -761,33 +790,31 @@ export default function CalculatorPage() {
               </span>
             </div>
 
-            <input
-              type="range"
-              min={0.5}
-              max={20}
-              step={0.1}
-              value={Math.min(20, Math.max(0.5, totals.disbursementPct))}
-              onChange={(e) => {
-                const newDisbPct = Number(e.target.value);
-                const currentDisbPct = totals.disbursementPct;
-                if (currentDisbPct <= 0) return;
-                const scale = currentDisbPct / newDisbPct;
-                setGoogle((prev) => ({
-                  ...prev,
-                  disbursedPct: Math.min(100, Math.max(0, parseFloat((prev.disbursedPct * scale).toFixed(2)))),
-                }));
-                setMeta((prev) => ({
-                  ...prev,
-                  disbursedPct: Math.min(100, Math.max(0, parseFloat((prev.disbursedPct * scale).toFixed(2)))),
-                }));
-              }}
-              aria-label="Disbursement % gauge — drag to adjust disbursed % of leads"
-              className="calc-gauge w-full"
-              style={{
-                "--gauge-pct": `${Math.min(100, (Math.min(20, totals.disbursementPct) / 20) * 100)}%`,
-                "--gauge-color": isAboveBenchmark ? "#ef4444" : "#4ade80",
-              } as React.CSSProperties}
-            />
+            <div className="relative flex items-center">
+              <input
+                type="range"
+                min={0.5}
+                max={20}
+                step={0.1}
+                value={Math.min(20, Math.max(0.5, totals.disbursementPct))}
+                onChange={(e) => handleGaugeChange(Number(e.target.value))}
+                aria-label="Disbursement % gauge"
+                className="calc-gauge w-full"
+                style={{
+                  "--gauge-pct": `${Math.min(
+                    100,
+                    (Math.min(20, totals.disbursementPct) / 20) * 100
+                  )}%`,
+                  "--gauge-color": isAboveBenchmark ? "#ef4444" : "#4ade80",
+                } as React.CSSProperties}
+              />
+              <div
+                className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-0.5 h-3.5 bg-white/70 rounded-full"
+                style={{
+                  left: `${(benchmarks.disbursementPct / 20) * 100}%`,
+                }}
+              />
+            </div>
           </section>
 
           {/* 6 KPI Stat Cards */}
@@ -852,75 +879,90 @@ export default function CalculatorPage() {
             </section>
           )}
 
-          {/* Channel Comparison Cards */}
+          {/* Channel Comparison Cards (Single outer card matching artifact) */}
           {channelMode === "both" && (
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {[
-                {
-                  key: "google" as const,
-                  name: "Google Ads",
-                  dot: "bg-[#4ade80]",
-                  m: gMetrics,
-                },
-                {
-                  key: "meta" as const,
-                  name: "Meta Ads",
-                  dot: "bg-blue-400",
-                  m: mMetrics,
-                },
-              ].map((ch) => {
-                const isBest = lowerCostChannel === ch.key;
-                return (
-                  <div
-                    key={ch.key}
-                    className={`rounded-2xl border p-4 sm:p-5 space-y-2.5 ${
-                      isBest
-                        ? `${cardBg} border-[#4ade80]/60`
-                        : cardBg
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2 pb-1">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${ch.dot}`} />
-                        <h3 className="font-bold text-base">{ch.name}</h3>
+            <section className={`rounded-2xl border p-4 sm:p-5 ${cardBg}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  {
+                    key: "google" as const,
+                    name: "Google Ads",
+                    dot: "bg-[#4ade80]",
+                    m: gMetrics,
+                  },
+                  {
+                    key: "meta" as const,
+                    name: "Meta Ads",
+                    dot: "bg-blue-400",
+                    m: mMetrics,
+                  },
+                ].map((ch) => {
+                  const diff = Math.abs(
+                    gMetrics.costPerDisbursedLoan - mMetrics.costPerDisbursedLoan
+                  );
+                  const isBest = lowerCostChannel === ch.key && diff > 5;
+                  return (
+                    <div
+                      key={ch.key}
+                      className={
+                        isBest
+                          ? "rounded-xl border border-emerald-500/60 p-3.5 space-y-2 bg-emerald-500/5"
+                          : "p-2 space-y-2"
+                      }
+                    >
+                      <div className="flex items-center justify-between gap-2 pb-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${ch.dot}`} />
+                          <h3 className="font-bold text-base">{ch.name}</h3>
+                        </div>
+                        {isBest && (
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[11px] font-bold">
+                            Lower cost per loan
+                          </span>
+                        )}
                       </div>
-                      {isBest && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[11px] font-bold">
-                          Lower cost per loan
-                        </span>
-                      )}
-                    </div>
 
-                    {[
-                      { label: "CPL", val: formatCurrency(ch.m.cpl) },
-                      {
-                        label: "Cost per qualified lead",
-                        val: formatCurrency(Math.round(ch.m.costPerQualifiedLead)),
-                      },
-                      {
-                        label: "Cost per disbursed loan",
-                        val: formatCurrency(Math.round(ch.m.costPerDisbursedLoan)),
-                      },
-                      {
-                        label: "Loans disbursed",
-                        val: formatIN(Math.round(ch.m.loansDisbursed)),
-                      },
-                      {
-                        label: "Amount disbursed",
-                        val: formatINRCompact(ch.m.amountDisbursedMonth),
-                      },
-                    ].map((row) => (
-                      <div
-                        key={row.label}
-                        className="flex items-center justify-between text-xs sm:text-sm"
-                      >
-                        <span className={mutedText}>{row.label}</span>
-                        <span className="font-mono font-bold">{row.val}</span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
+                      {[
+                        {
+                          label: "CPL",
+                          val: formatCurrency(
+                            ch.m.effectiveCpl,
+                            ch.m.effectiveCpl % 1 !== 0 ? 2 : 0
+                          ),
+                        },
+                        {
+                          label: "Cost per qualified lead",
+                          val: formatCurrency(
+                            Math.round(ch.m.costPerQualifiedLead)
+                          ),
+                        },
+                        {
+                          label: "Cost per disbursed loan",
+                          val: formatCurrency(
+                            Math.round(ch.m.costPerDisbursedLoan)
+                          ),
+                        },
+                        {
+                          label: "Loans",
+                          val: formatIN(Math.round(ch.m.loansDisbursed)),
+                        },
+                        {
+                          label: "Amount",
+                          val: formatINRCompact(ch.m.amountDisbursedMonth),
+                        },
+                      ].map((row) => (
+                        <div
+                          key={row.label}
+                          className="flex items-center justify-between text-xs sm:text-sm"
+                        >
+                          <span className={mutedText}>{row.label}</span>
+                          <span className="font-mono font-bold">{row.val}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
             </section>
           )}
 
@@ -1120,7 +1162,11 @@ export default function CalculatorPage() {
                 <div className="flex items-center gap-2 font-bold">
                   <span className="w-2 h-2 rounded-full bg-[#4ade80]" />
                   <span>Google Ads</span>
-                  {lowerCostChannel === "google" && (
+                  {lowerCostChannel === "google" &&
+                    Math.abs(
+                      gMetrics.costPerDisbursedLoan -
+                        mMetrics.costPerDisbursedLoan
+                    ) > 5 && (
                     <span className="px-2 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] font-bold">
                       Lower cost per loan
                     </span>
@@ -1131,7 +1177,11 @@ export default function CalculatorPage() {
                     <strong>Spend:</strong>{" "}
                     {formatCurrency(Math.round(gMetrics.budgetDay))} a day (
                     {formatINRCompact(gMetrics.budgetMonth)} a month) at{" "}
-                    {formatCurrency(google.cpl)} per lead, bringing{" "}
+                    {formatCurrency(
+                      gMetrics.effectiveCpl,
+                      gMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                    )}{" "}
+                    per lead, bringing{" "}
                     {formatIN(Math.round(gMetrics.leadsDay))} leads a day (
                     {formatIN(Math.round(gMetrics.leadsMonth))} a month).
                   </li>
@@ -1176,8 +1226,14 @@ export default function CalculatorPage() {
                     </strong>{" "}
                     cost per lead{" "}
                     {gMetrics.disbursementPct <= benchmarks.disbursementPct
-                      ? `can rise to ${formatCurrency(gMaxCpl, 2)} (now ${formatCurrency(google.cpl)}), or disbursed % of leads can fall to ${gMinDisbPct.toFixed(2)}% (now ${google.disbursedPct}%), before crossing ${benchmarks.disbursementPct}%.`
-                      : `needs to be ${formatCurrency(gMaxCpl, 2)} (now ${formatCurrency(google.cpl)}), or lift disbursed % of leads to ${gMinDisbPct.toFixed(2)}% (now ${google.disbursedPct}%).`}
+                      ? `can rise to ${formatCurrency(gMaxCpl, 2)} (now ${formatCurrency(
+                          gMetrics.effectiveCpl,
+                          gMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                        )}), or disbursed % of leads can fall to ${gMinDisbPct.toFixed(2)}% (now ${google.disbursedPct}%), before crossing ${benchmarks.disbursementPct}%.`
+                      : `needs to be ${formatCurrency(gMaxCpl, 2)} (now ${formatCurrency(
+                          gMetrics.effectiveCpl,
+                          gMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                        )}), or lift disbursed % of leads to ${gMinDisbPct.toFixed(2)}% (now ${google.disbursedPct}%).`}
                   </li>
                 </ul>
               </div>
@@ -1188,7 +1244,11 @@ export default function CalculatorPage() {
                 <div className="flex items-center gap-2 font-bold">
                   <span className="w-2 h-2 rounded-full bg-blue-400" />
                   <span>Meta Ads</span>
-                  {lowerCostChannel === "meta" && (
+                  {lowerCostChannel === "meta" &&
+                    Math.abs(
+                      gMetrics.costPerDisbursedLoan -
+                        mMetrics.costPerDisbursedLoan
+                    ) > 5 && (
                     <span className="px-2 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] font-bold">
                       Lower cost per loan
                     </span>
@@ -1199,7 +1259,11 @@ export default function CalculatorPage() {
                     <strong>Spend:</strong>{" "}
                     {formatCurrency(Math.round(mMetrics.budgetDay))} a day (
                     {formatINRCompact(mMetrics.budgetMonth)} a month) at{" "}
-                    {formatCurrency(meta.cpl)} per lead, bringing{" "}
+                    {formatCurrency(
+                      mMetrics.effectiveCpl,
+                      mMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                    )}{" "}
+                    per lead, bringing{" "}
                     {formatIN(Math.round(mMetrics.leadsDay))} leads a day (
                     {formatIN(Math.round(mMetrics.leadsMonth))} a month).
                   </li>
@@ -1242,12 +1306,29 @@ export default function CalculatorPage() {
                         ? "Headroom:"
                         : `To reach ${benchmarks.disbursementPct}%:`}
                     </strong>{" "}
-                    bring cost per lead down to {formatCurrency(mMaxCpl, 2)}{" "}
-                    (now {formatCurrency(meta.cpl)}), or lift disbursed % of
-                    leads to {mMinDisbPct.toFixed(2)}% (now {meta.disbursedPct}
-                    %), or raise the average ticket to{" "}
-                    {formatCurrency(Math.round(mTargetTicket))} (now{" "}
-                    {formatCurrency(ticketSize)}).
+                    {mMetrics.disbursementPct <= benchmarks.disbursementPct
+                      ? `cost per lead can rise to ${formatCurrency(
+                          mMaxCpl,
+                          2
+                        )} (now ${formatCurrency(
+                          mMetrics.effectiveCpl,
+                          mMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                        )}), or disbursed % of leads can fall to ${mMinDisbPct.toFixed(
+                          2
+                        )}% (now ${meta.disbursedPct}%), before crossing ${
+                          benchmarks.disbursementPct
+                        }%.`
+                      : `bring cost per lead down to ${formatCurrency(
+                          mMaxCpl,
+                          2
+                        )} (now ${formatCurrency(
+                          mMetrics.effectiveCpl,
+                          mMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                        )}), or lift disbursed % of leads to ${mMinDisbPct.toFixed(
+                          2
+                        )}% (now ${meta.disbursedPct}%), or raise the average ticket to ${formatCurrency(
+                          Math.round(mTargetTicket)
+                        )} (now ${formatCurrency(ticketSize)}).`}
                   </li>
                 </ul>
               </div>
@@ -1302,12 +1383,18 @@ export default function CalculatorPage() {
                     },
                     {
                       label: "Cost per lead (effective)",
-                      g: formatCurrency(gMetrics.cpl),
-                      m: formatCurrency(mMetrics.cpl),
+                      g: formatCurrency(
+                        gMetrics.effectiveCpl,
+                        gMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                      ),
+                      m: formatCurrency(
+                        mMetrics.effectiveCpl,
+                        mMetrics.effectiveCpl % 1 !== 0 ? 2 : 0
+                      ),
                       t: `Blended CPL ${formatCurrency(totals.blendedCpl, 2)}`,
                     },
                     {
-                      label: "Leads per day",
+                      label: "Leads per day (lead required)",
                       g: formatIN(Math.round(gMetrics.leadsDay)),
                       m: formatIN(Math.round(mMetrics.leadsDay)),
                       t: formatIN(Math.round(totals.leadsDay)),
@@ -1374,10 +1461,16 @@ export default function CalculatorPage() {
                       t: formatINRCompact(totals.amountDisbursedMonth),
                     },
                     {
-                      label: "Disbursement %",
-                      g: `${gMetrics.disbursementPct.toFixed(2)}%`,
-                      m: `${mMetrics.disbursementPct.toFixed(2)}%`,
-                      t: `${totals.disbursementPct.toFixed(2)}%`,
+                      label: "Disbursement % (ad cost)",
+                      g: `${gMetrics.disbursementPct.toFixed(
+                        gMetrics.disbursementPct % 1 === 0 ? 0 : 2
+                      )}%`,
+                      m: `${mMetrics.disbursementPct.toFixed(
+                        mMetrics.disbursementPct % 1 === 0 ? 0 : 2
+                      )}%`,
+                      t: `${totals.disbursementPct.toFixed(
+                        totals.disbursementPct % 1 === 0 ? 0 : 2
+                      )}%`,
                     },
                   ].map((row) => (
                     <tr key={row.label}>
