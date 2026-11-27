@@ -945,17 +945,17 @@ export default function CalculatorPage() {
                       key={ch.key}
                       className={
                         isBest
-                          ? "rounded-xl border border-emerald-500/60 p-3.5 space-y-2 bg-emerald-500/5"
-                          : "p-2 space-y-2"
+                          ? "rounded-xl border border-emerald-500/60 p-3 sm:p-3.5 space-y-2 bg-emerald-500/5"
+                          : "p-3 space-y-2"
                       }
                     >
-                      <div className="flex items-center justify-between gap-2 pb-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2.5 h-2.5 rounded-full ${ch.dot}`} />
-                          <h3 className="font-bold text-base">{ch.name}</h3>
+                      <div className="flex items-center justify-between gap-1.5 pb-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
+                          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${ch.dot}`} />
+                          <h3 className="font-bold text-sm sm:text-base whitespace-nowrap">{ch.name}</h3>
                         </div>
                         {isBest && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[11px] font-bold">
+                          <span className="shrink-0 whitespace-nowrap px-2 sm:px-2.5 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] sm:text-[11px] font-bold">
                             Lower cost per loan
                           </span>
                         )}
@@ -1216,7 +1216,7 @@ export default function CalculatorPage() {
                       gMetrics.costPerDisbursedLoan -
                         mMetrics.costPerDisbursedLoan
                     ) > 5 && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] font-bold">
+                    <span className="shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] font-bold">
                       Lower cost per loan
                     </span>
                   )}
@@ -1298,7 +1298,7 @@ export default function CalculatorPage() {
                       gMetrics.costPerDisbursedLoan -
                         mMetrics.costPerDisbursedLoan
                     ) > 5 && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] font-bold">
+                    <span className="shrink-0 whitespace-nowrap px-2 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] font-bold">
                       Lower cost per loan
                     </span>
                   )}
