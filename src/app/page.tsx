@@ -754,37 +754,37 @@ export default function HomePage() {
             </div>
 
             <ScrollReveal delayMs={300}>
-              <div className="mt-16 p-8 rounded-xl glass-strong">
-                <div className="flex items-center justify-between flex-wrap gap-8">
-                  <div className="flex items-center gap-4">
-                    <div>
+              <div className="mt-12 sm:mt-16 p-5 sm:p-8 rounded-xl glass-strong">
+                <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 sm:gap-8 text-center sm:text-left">
+                  <div className="flex items-center justify-center gap-2 sm:gap-4 max-w-full">
+                    <div className="shrink-0">
                       <Database
-                        className="w-8 h-8 text-mint/60"
+                        className="w-6 h-6 sm:w-8 sm:h-8 text-mint/60"
                         aria-hidden="true"
                       />
                     </div>
                     <div
                       aria-hidden="true"
-                      className="w-16 h-px bg-gradient-to-r from-mint/60 to-mint/20"
+                      className="w-8 sm:w-16 h-px bg-gradient-to-r from-mint/60 to-mint/20 shrink"
                     />
-                    <div>
+                    <div className="shrink-0">
                       <Workflow
-                        className="w-8 h-8 text-mint/80"
+                        className="w-6 h-6 sm:w-8 sm:h-8 text-mint/80"
                         aria-hidden="true"
                       />
                     </div>
                     <div
                       aria-hidden="true"
-                      className="w-16 h-px bg-gradient-to-r from-mint/60 to-mint/20"
+                      className="w-8 sm:w-16 h-px bg-gradient-to-r from-mint/60 to-mint/20 shrink"
                     />
-                    <div>
+                    <div className="shrink-0">
                       <ChartLine
-                        className="w-8 h-8 text-mint"
+                        className="w-6 h-6 sm:w-8 sm:h-8 text-mint"
                         aria-hidden="true"
                       />
                     </div>
                   </div>
-                  <p className="text-muted-foreground text-sm font-mono">
+                  <p className="text-muted-foreground text-xs sm:text-sm font-mono">
                     Data → Processing → Insights →{" "}
                     <span className="text-mint font-semibold">Disbursals</span>
                   </p>
