@@ -1195,7 +1195,7 @@ export default function CalculatorPage() {
             <h2 className="text-lg font-bold">Summary</h2>
 
             <p className={`text-xs sm:text-sm leading-relaxed ${mutedText}`}>
-              Spending{" "}
+              A budget of{" "}
               <strong className="text-foreground">
                 {formatCurrency(Math.round(totals.budgetDay))}
               </strong>{" "}
@@ -1211,26 +1211,36 @@ export default function CalculatorPage() {
               at an average ticket of {formatCurrency(ticketSize)}.{" "}
               {channelMode === "both" &&
                 `Split: Google ${effectiveGoogleSplit}% / Meta ${effectiveMetaSplit}%. `}
-              Overall cost per disbursed loan is{" "}
+              Blended CPL{" "}
+              <strong className="text-foreground">
+                {formatCurrency(
+                  totals.blendedCpl,
+                  totals.blendedCpl % 1 !== 0 ? 2 : 0
+                )}
+              </strong>
+              ,{" "}
               <strong className="text-foreground">
                 {formatCurrency(Math.round(totals.costPerDisbursedLoan))}
-              </strong>
-              , disbursement %{" "}
+              </strong>{" "}
+              per disbursed loan, disbursement %{" "}
               <strong
                 className={
                   isAboveBenchmark ? "text-red-400" : "text-[#4ade80]"
                 }
               >
-                {totals.disbursementPct.toFixed(2)}%
+                {totals.disbursementPct.toFixed(
+                  totals.disbursementPct % 1 === 0 ? 0 : 2
+                )}
+                %
               </strong>
               ,{" "}
               {isAboveBenchmark
-                ? `above the ${benchmarks.disbursementPct}% benchmark by ${(
+                ? `above the ${benchmarks.disbursementPct}% benchmark by ${Math.round(
                     totals.disbursementPct - benchmarks.disbursementPct
-                  ).toFixed(2)} points.`
-                : `within the ${benchmarks.disbursementPct}% benchmark by ${(
+                  )} points.`
+                : `within the ${benchmarks.disbursementPct}% benchmark by ${Math.round(
                     benchmarks.disbursementPct - totals.disbursementPct
-                  ).toFixed(2)} points.`}
+                  )} points.`}
             </p>
 
             {(channelMode === "google" || channelMode === "both") && (
