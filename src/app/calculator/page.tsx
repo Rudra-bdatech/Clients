@@ -911,8 +911,8 @@ export default function CalculatorPage() {
             </section>
           )}
 
-          {/* Horizontal Grouped Bar Chart */}
-          <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
+          {/* Horizontal Grouped Bar Chart (directly on page background, no card box) */}
+          <section className="pt-2 space-y-5">
             <div className="flex items-center gap-5 text-xs font-semibold">
               {(channelMode === "google" || channelMode === "both") && (
                 <span className="inline-flex items-center gap-2">
@@ -936,7 +936,7 @@ export default function CalculatorPage() {
                   m: mMetrics.leadsMonth,
                 },
                 {
-                  stage: "Completed appl.",
+                  stage: "Completed",
                   g: gMetrics.completedApps,
                   m: mMetrics.completedApps,
                 },
@@ -953,12 +953,13 @@ export default function CalculatorPage() {
               ].map((row) => (
                 <div
                   key={row.stage}
-                  className="grid grid-cols-[100px_1fr] sm:grid-cols-[120px_1fr] items-center gap-3"
+                  className="grid grid-cols-[90px_1fr] sm:grid-cols-[100px_1fr] items-center gap-3"
                 >
                   <span className={`text-xs ${mutedText}`}>{row.stage}</span>
                   <div className="space-y-1.5">
                     {(channelMode === "google" || channelMode === "both") && (
-                      <div className="h-6 rounded-md bg-[#4ade80] text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
+                      <div
+                        className="h-6 min-w-fit rounded-md bg-[#4ade80] text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
                         style={{
                           width: `${Math.max(8, (row.g / maxChartValue) * 100)}%`,
                         }}
@@ -967,7 +968,8 @@ export default function CalculatorPage() {
                       </div>
                     )}
                     {(channelMode === "meta" || channelMode === "both") && (
-                      <div className="h-6 rounded-md bg-blue-400 text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
+                      <div
+                        className="h-6 min-w-fit rounded-md bg-blue-400 text-[#04101f] text-xs font-mono font-bold flex items-center justify-end px-2.5 transition-all duration-300"
                         style={{
                           width: `${Math.max(8, (row.m / maxChartValue) * 100)}%`,
                         }}
@@ -980,8 +982,10 @@ export default function CalculatorPage() {
               ))}
             </div>
           </section>
+          </div>
+          </div>
 
-          {/* Editable Benchmarks Card */}
+          {/* Editable Benchmarks Card (Full Width) */}
           <section className={`rounded-2xl border p-5 sm:p-6 space-y-4 ${cardBg}`}>
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-base">Benchmarks</h2>
@@ -1054,8 +1058,6 @@ export default function CalculatorPage() {
               ))}
             </div>
           </section>
-          </div>
-          </div>
 
           {/* Summary Section (directly on page background, no card box) */}
           <section className="pt-4 space-y-5">
