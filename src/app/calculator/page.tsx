@@ -320,7 +320,7 @@ export default function CalculatorPage() {
           />
         )}
 
-        <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+        <div className="relative z-10 max-w-6xl mx-auto space-y-6">
           {/* Header */}
           <div className="relative flex items-center justify-center pt-2 pb-1">
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-center pr-12 sm:pr-0">
@@ -340,9 +340,9 @@ export default function CalculatorPage() {
             </button>
           </div>
 
-          {/* Top Controls Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex flex-col items-center sm:items-start gap-2">
+          {/* Top Controls Row (Centered) */}
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="flex flex-col items-center gap-2">
               <span className={`text-xs font-medium ${mutedText}`}>
                 What do you know?
               </span>
@@ -358,7 +358,7 @@ export default function CalculatorPage() {
                       : `${mutedText} hover:text-emerald-400`
                   }`}
                 >
-                  Budget
+                  Ad Budget
                 </button>
                 <button
                   type="button"
@@ -374,7 +374,7 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center sm:items-end gap-2">
+            <div className="flex flex-col items-center gap-2">
               <span className={`text-xs font-medium ${mutedText}`}>
                 Where are the ads running?
               </span>
@@ -399,143 +399,152 @@ export default function CalculatorPage() {
             </div>
           </div>
 
-          {/* Budget / Target & Ticket Size Card */}
-          <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
-            <div className="flex items-center justify-between gap-4">
-              <label
-                htmlFor="primary-amount"
-                className={`text-sm font-medium ${mutedText}`}
-              >
-                {knowMode === "budget"
-                  ? `Budget per ${periodMode}`
-                  : `Target disbursal per ${periodMode}`}
-              </label>
+          {/* Main 2-Column Dashboard Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* LEFT COLUMN: Inputs */}
+            <div className="space-y-6">
+              {/* Ad budget & Ticket Size Card */}
+              <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="text-lg font-bold">
+                    {knowMode === "budget" ? "Ad budget" : "Disbursal target"}
+                  </h2>
 
-              <div className={`inline-flex rounded-xl border p-1 ${subCardBg}`}>
-                <button
-                  type="button"
-                  onClick={() => setPeriodMode("day")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                    periodMode === "day"
-                      ? "bg-[#4ade80] text-[#04101f]"
-                      : mutedText
-                  }`}
-                >
-                  Per day
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPeriodMode("month")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                    periodMode === "month"
-                      ? "bg-[#4ade80] text-[#04101f]"
-                      : mutedText
-                  }`}
-                >
-                  Per month
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <div
-                className={`flex items-center justify-between rounded-xl border px-4 py-3 ${inputBg}`}
-              >
-                <span className={`text-sm font-mono ${mutedText}`}>₹</span>
-                <input
-                  id="primary-amount"
-                  type="number"
-                  min={0}
-                  step={periodMode === "month" ? 10000 : 1000}
-                  value={
-                    knowMode === "budget"
-                      ? displayBudgetValue
-                      : displayTargetValue
-                  }
-                  onChange={(e) => {
-                    const val = Math.max(0, Number(e.target.value) || 0);
-                    const monthly =
-                      periodMode === "month" ? val : val * DAYS_PER_MONTH;
-                    if (knowMode === "budget") {
-                      setBudgetMonth(monthly);
-                    } else {
-                      setTargetDisbursalMonth(monthly);
-                    }
-                  }}
-                  className="w-full bg-transparent text-right font-mono font-bold text-base focus:outline-none"
-                />
-              </div>
-              <p className="mt-2 text-xs font-bold">
-                {knowMode === "budget"
-                  ? periodMode === "month"
-                    ? `= ${formatCurrency(budgetMonth / DAYS_PER_MONTH)} per day`
-                    : `= ${formatCurrency(budgetMonth)} per month`
-                  : periodMode === "month"
-                    ? `= ${formatINRCompact(targetDisbursalMonth / DAYS_PER_MONTH)} per day`
-                    : `= ${formatINRCompact(targetDisbursalMonth)} per month`}
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="ticket-size"
-                className={`block text-sm font-medium mb-2 ${mutedText}`}
-              >
-                Average ticket size per loan
-              </label>
-              <div
-                className={`flex items-center justify-between rounded-xl border px-4 py-3 ${inputBg}`}
-              >
-                <span className={`text-sm font-mono ${mutedText}`}>₹</span>
-                <input
-                  id="ticket-size"
-                  type="number"
-                  min={100}
-                  step={500}
-                  value={ticketSize}
-                  onChange={(e) =>
-                    setTicketSize(Math.max(100, Number(e.target.value) || 0))
-                  }
-                  className="w-full bg-transparent text-right font-mono font-bold text-base focus:outline-none"
-                />
-              </div>
-              <p className={`mt-1.5 text-xs ${mutedText}`}>
-                Amount of loan disbursed ÷ number of loans disbursed.
-              </p>
-            </div>
-
-            {channelMode === "both" && (
-              <div>
-                <label
-                  htmlFor="channel-split"
-                  className={`block text-sm font-medium mb-3 ${mutedText}`}
-                >
-                  Budget split between channels
-                </label>
-                <input
-                  id="channel-split"
-                  type="range"
-                  min={10}
-                  max={90}
-                  step={5}
-                  value={googleSplit}
-                  onChange={(e) => setGoogleSplit(Number(e.target.value))}
-                  className="w-full accent-[#4ade80] cursor-pointer"
-                />
-                <div className="flex items-center justify-between text-xs font-bold mt-2">
-                  <span>Google {googleSplit}%</span>
-                  <span>Meta {100 - googleSplit}%</span>
+                  <div className={`inline-flex rounded-xl border p-1 ${subCardBg}`}>
+                    <button
+                      type="button"
+                      onClick={() => setPeriodMode("day")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                        periodMode === "day"
+                          ? "bg-[#4ade80] text-[#04101f]"
+                          : mutedText
+                      }`}
+                    >
+                      Per day
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPeriodMode("month")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                        periodMode === "month"
+                          ? "bg-[#4ade80] text-[#04101f]"
+                          : mutedText
+                      }`}
+                    >
+                      Per month
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </section>
 
-          {/* Channel Funnel Inputs */}
-          <section
-            className={`grid gap-4 ${
-              channelMode === "both" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
-            }`}
-          >
+                <div>
+                  <label
+                    htmlFor="primary-amount"
+                    className={`block text-xs font-medium mb-2 ${mutedText}`}
+                  >
+                    {knowMode === "budget"
+                      ? `Budget per ${periodMode}`
+                      : `Target disbursal per ${periodMode}`}
+                  </label>
+                  <div
+                    className={`flex items-center justify-between rounded-xl border px-4 py-3 ${inputBg}`}
+                  >
+                    <span className={`text-sm font-mono ${mutedText}`}>₹</span>
+                    <input
+                      id="primary-amount"
+                      type="text"
+                      inputMode="numeric"
+                      value={formatIN(
+                        knowMode === "budget"
+                          ? displayBudgetValue
+                          : displayTargetValue
+                      )}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        const val = Math.max(0, Number(raw) || 0);
+                        const monthly =
+                          periodMode === "month" ? val : val * DAYS_PER_MONTH;
+                        if (knowMode === "budget") {
+                          setBudgetMonth(monthly);
+                        } else {
+                          setTargetDisbursalMonth(monthly);
+                        }
+                      }}
+                      className="w-full bg-transparent text-right font-mono font-bold text-base focus:outline-none"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs font-bold">
+                    {knowMode === "budget"
+                      ? periodMode === "month"
+                        ? `= ${formatCurrency(budgetMonth / DAYS_PER_MONTH)} per day`
+                        : `= ${formatCurrency(budgetMonth)} per month`
+                      : periodMode === "month"
+                        ? `= ${formatINRCompact(targetDisbursalMonth / DAYS_PER_MONTH)} per day`
+                        : `= ${formatINRCompact(targetDisbursalMonth)} per month`}
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="ticket-size"
+                    className={`block text-xs font-medium mb-2 ${mutedText}`}
+                  >
+                    Average ticket size per loan
+                  </label>
+                  <div
+                    className={`flex items-center justify-between rounded-xl border px-4 py-3 ${inputBg}`}
+                  >
+                    <span className={`text-sm font-mono ${mutedText}`}>₹</span>
+                    <input
+                      id="ticket-size"
+                      type="text"
+                      inputMode="numeric"
+                      value={formatIN(ticketSize)}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        setTicketSize(Math.max(0, Number(raw) || 0));
+                      }}
+                      className="w-full bg-transparent text-right font-mono font-bold text-base focus:outline-none"
+                    />
+                  </div>
+                  <p className={`mt-1.5 text-xs ${mutedText}`}>
+                    Amount of loan disbursed ÷ number of loans disbursed.
+                  </p>
+                </div>
+
+                {channelMode === "both" && (
+                  <div>
+                    <label
+                      htmlFor="channel-split"
+                      className={`block text-xs font-medium mb-3 ${mutedText}`}
+                    >
+                      Budget split between channels
+                    </label>
+                    <input
+                      id="channel-split"
+                      type="range"
+                      min={10}
+                      max={90}
+                      step={5}
+                      value={googleSplit}
+                      onChange={(e) => setGoogleSplit(Number(e.target.value))}
+                      className="w-full accent-[#4ade80] cursor-pointer"
+                    />
+                    <div className="flex items-center justify-between text-xs font-bold mt-2">
+                      <span>Google {googleSplit}%</span>
+                      <span>Meta {100 - googleSplit}%</span>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* Channel Funnel Inputs */}
+              <section
+                className={`grid gap-4 ${
+                  channelMode === "both"
+                    ? "grid-cols-1 sm:grid-cols-2"
+                    : "grid-cols-1"
+                }`}
+              >
             {(channelMode === "google" || channelMode === "both") && (
               <div className={`rounded-2xl border p-5 space-y-4 ${cardBg}`}>
                 <div className="flex items-center gap-2">
@@ -699,6 +708,9 @@ export default function CalculatorPage() {
             )}
           </section>
 
+          {/* Right Column: Hero Output, Gauge, KPIs, Best Mix, Channel Comparison, Chart, Benchmarks */}
+          </div>
+          <div className="space-y-6">
           {/* Hero Output Card */}
           <section
             className={`rounded-2xl border p-6 sm:p-8 ${
@@ -709,7 +721,7 @@ export default function CalculatorPage() {
           >
             <p className={`text-xs sm:text-sm mb-2 ${mutedText}`}>
               {knowMode === "budget"
-                ? `Estimated monthly disbursal on ${formatCurrency(totals.budgetDay)} a day`
+                ? `Disbursed per month on ${formatCurrency(totals.budgetDay)} a day`
                 : `Required monthly ad budget for ${formatINRCompact(totals.amountDisbursedMonth)} disbursal`}
             </p>
             <div className="text-4xl sm:text-5xl font-extrabold font-mono text-[#4ade80] mb-3">
@@ -1042,6 +1054,8 @@ export default function CalculatorPage() {
               ))}
             </div>
           </section>
+          </div>
+          </div>
 
           {/* Summary Section */}
           <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
