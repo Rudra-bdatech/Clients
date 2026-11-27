@@ -324,12 +324,8 @@ export default function CalculatorPage() {
   const handleGaugeChange = (targetDisbPct: number) => {
     if (targetDisbPct <= 0 || ticketSize <= 0) return;
     const targetD = targetDisbPct / 100;
-    const newG = parseFloat(
-      ((gMetrics.effectiveCpl * 100) / (ticketSize * targetD)).toFixed(2)
-    );
-    const newM = parseFloat(
-      ((mMetrics.effectiveCpl * 100) / (ticketSize * targetD)).toFixed(2)
-    );
+    const newG = (gMetrics.effectiveCpl * 100) / (ticketSize * targetD);
+    const newM = (mMetrics.effectiveCpl * 100) / (ticketSize * targetD);
     setGoogle((prev) => ({ ...prev, disbursedPct: newG }));
     setMeta((prev) => ({ ...prev, disbursedPct: newM }));
   };
@@ -648,7 +644,11 @@ export default function CalculatorPage() {
                         type="number"
                         min={0}
                         step={field.suffix === "%" ? 0.01 : 1}
-                        value={field.value}
+                        value={
+                          field.suffix === "%"
+                            ? parseFloat(Number(field.value).toFixed(2))
+                            : field.value
+                        }
                         onChange={(e) =>
                           setGoogle((prev) => ({
                             ...prev,
@@ -741,7 +741,11 @@ export default function CalculatorPage() {
                         type="number"
                         min={0}
                         step={field.suffix === "%" ? 0.01 : 1}
-                        value={field.value}
+                        value={
+                          field.suffix === "%"
+                            ? parseFloat(Number(field.value).toFixed(2))
+                            : field.value
+                        }
                         onChange={(e) =>
                           setMeta((prev) => ({
                             ...prev,
