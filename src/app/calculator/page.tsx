@@ -337,7 +337,7 @@ export default function CalculatorPage() {
   // Theme classes — static design tokens (global theme handled by Navbar toggle)
   const pageBg = "bg-background text-foreground";
   const cardBg = "bg-card border-border";
-  const inputBg = "bg-secondary/70 border-border text-foreground";
+  const inputBg = "calc-input-box";
   const mutedText = "text-muted-foreground";
   const subCardBg = "bg-secondary border-border";
 
@@ -474,7 +474,7 @@ export default function CalculatorPage() {
                       : `Target disbursal per ${periodMode}`}
                   </label>
                   <div
-                    className={`flex items-center justify-between rounded-xl border px-4 py-3 ${inputBg}`}
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 ${inputBg}`}
                   >
                     <span className={`text-sm font-mono ${mutedText}`}>₹</span>
                     <input
@@ -519,7 +519,7 @@ export default function CalculatorPage() {
                     Average ticket size per loan
                   </label>
                   <div
-                    className={`flex items-center justify-between rounded-xl border px-4 py-3 ${inputBg}`}
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 ${inputBg}`}
                   >
                     <span className={`text-sm font-mono ${mutedText}`}>₹</span>
                     <input
@@ -619,10 +619,10 @@ export default function CalculatorPage() {
                       {field.label}
                     </label>
                     <div
-                      className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${
+                      className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 ${
                         field.key === "disbursedPct" &&
                         google.disbursedPct > google.approvedPct
-                          ? "bg-red-500/10 border-red-500/50 text-foreground"
+                          ? "calc-input-box-error"
                           : inputBg
                       }`}
                     >
@@ -712,10 +712,10 @@ export default function CalculatorPage() {
                       {field.label}
                     </label>
                     <div
-                      className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${
+                      className={`flex items-center justify-between rounded-xl px-3.5 py-2.5 ${
                         field.key === "disbursedPct" &&
                         meta.disbursedPct > meta.approvedPct
-                          ? "bg-red-500/10 border-red-500/50 text-foreground"
+                          ? "calc-input-box-error"
                           : inputBg
                       }`}
                     >
@@ -793,7 +793,7 @@ export default function CalculatorPage() {
 
             <div className="flex flex-wrap items-center gap-3">
               <div
-                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 font-mono font-bold text-base sm:text-lg ${inputBg}`}
+                className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-1.5 font-mono font-bold text-base sm:text-lg ${inputBg}`}
               >
                 <input
                   type="number"
@@ -1133,7 +1133,7 @@ export default function CalculatorPage() {
                     {b.label}
                   </label>
                   <div
-                    className={`flex items-center justify-between rounded-xl border px-3 py-2 ${inputBg}`}
+                    className={`flex items-center justify-between rounded-xl px-3 py-2 ${inputBg}`}
                   >
                     <input
                       id={b.id}
