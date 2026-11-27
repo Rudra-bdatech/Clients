@@ -71,26 +71,41 @@ function formatCurrency(amount: number, decimals = 0): string {
   return `₹${formatIN(amount, decimals)}`;
 }
 
-function computeChannelMetrics(budgetMonth: number, ch: ChannelInputs, ticketSize: number) {
+function computeChannelMetrics(
+  channelBudgetMonth: number,
+  ch: ChannelInputs,
+  ticketSize: number,
+  channelSplit: number,
+  isBothChannels: boolean
+) {
   const safeCpl = Math.max(1, ch.cpl);
-  const leadsMonth = Math.round(budgetMonth / safeCpl);
-  const leadsDay = Math.round(leadsMonth / DAYS_PER_MONTH);
-  const completedApps = Math.round(leadsMonth * (ch.completedPct / 100));
-  const approvedLeads = Math.round(leadsMonth * (ch.approvedPct / 100));
+  // Spend saturation (e = 0.2, reference spend at 50% split)
+  // Only applies when both channels run and split > 0 (matching Claude Artifact specification)
+  const saturationFactor =
+    isBothChannels && channelSplit > 0
+      ? Math.pow(channelSplit / 50, 0.2)
+      : 1;
+  const effectiveCpl = safeCpl * saturationFactor;
+
+  const leadsMonth = channelBudgetMonth / effectiveCpl;
+  const leadsDay = leadsMonth / DAYS_PER_MONTH;
+  const completedApps = leadsMonth * (ch.completedPct / 100);
+  const approvedLeads = leadsMonth * (ch.approvedPct / 100);
   const loansDisbursed = leadsMonth * (ch.disbursedPct / 100);
   const amountDisbursedMonth = loansDisbursed * ticketSize;
   const amountDisbursedDay = amountDisbursedMonth / DAYS_PER_MONTH;
-  const effectiveCpl = leadsMonth > 0 ? budgetMonth / leadsMonth : safeCpl;
   const costPerQualifiedLead =
-    approvedLeads > 0 ? budgetMonth / approvedLeads : 0;
+    approvedLeads > 0 ? channelBudgetMonth / approvedLeads : 0;
   const costPerDisbursedLoan =
-    loansDisbursed > 0 ? budgetMonth / loansDisbursed : 0;
+    loansDisbursed > 0 ? channelBudgetMonth / loansDisbursed : 0;
   const disbursementPct =
-    amountDisbursedMonth > 0 ? (budgetMonth * 100) / amountDisbursedMonth : 0;
+    amountDisbursedMonth > 0
+      ? (channelBudgetMonth * 100) / amountDisbursedMonth
+      : 0;
 
   return {
-    budgetMonth,
-    budgetDay: budgetMonth / DAYS_PER_MONTH,
+    budgetMonth: channelBudgetMonth,
+    budgetDay: channelBudgetMonth / DAYS_PER_MONTH,
     cpl: ch.cpl,
     effectiveCpl,
     leadsMonth,
@@ -123,18 +138,25 @@ export default function CalculatorPage() {
   const effectiveGoogleSplit =
     channelMode === "google" ? 100 : channelMode === "meta" ? 0 : googleSplit;
   const effectiveMetaSplit = 100 - effectiveGoogleSplit;
+  const isBoth = channelMode === "both";
 
   // Determine total monthly budget based on knowMode
   const totalBudgetMonth = useMemo(() => {
     if (knowMode === "budget") return Math.max(0, budgetMonth);
 
-    // Target mode: Disbursal = totalBudget * sum(split_i * disbursedPct_i / (100 * cpl_i)) * ticketSize
+    // Target mode with saturation:
+    // Disbursal = totalBudget * sum(split_i * disbursedPct_i / (100 * cpl_eff_i)) * ticketSize
+    const gSat = isBoth && effectiveGoogleSplit > 0 ? Math.pow(effectiveGoogleSplit / 50, 0.2) : 1;
+    const mSat = isBoth && effectiveMetaSplit > 0 ? Math.pow(effectiveMetaSplit / 50, 0.2) : 1;
+    const gEffCpl = Math.max(1, google.cpl) * gSat;
+    const mEffCpl = Math.max(1, meta.cpl) * mSat;
+
     const gFactor =
       (effectiveGoogleSplit / 100) *
-      (google.disbursedPct / 100 / Math.max(1, google.cpl));
+      (google.disbursedPct / 100 / gEffCpl);
     const mFactor =
       (effectiveMetaSplit / 100) *
-      (meta.disbursedPct / 100 / Math.max(1, meta.cpl));
+      (meta.disbursedPct / 100 / mEffCpl);
     const totalLoansPerRupee = gFactor + mFactor;
     if (totalLoansPerRupee <= 0 || ticketSize <= 0) return 0;
     return targetDisbursalMonth / (totalLoansPerRupee * ticketSize);
@@ -143,6 +165,8 @@ export default function CalculatorPage() {
     budgetMonth,
     targetDisbursalMonth,
     ticketSize,
+    channelMode,
+    isBoth,
     effectiveGoogleSplit,
     effectiveMetaSplit,
     google,
@@ -154,9 +178,11 @@ export default function CalculatorPage() {
       computeChannelMetrics(
         totalBudgetMonth * (effectiveGoogleSplit / 100),
         google,
-        ticketSize
+        ticketSize,
+        effectiveGoogleSplit,
+        isBoth
       ),
-    [totalBudgetMonth, effectiveGoogleSplit, google, ticketSize]
+    [totalBudgetMonth, effectiveGoogleSplit, google, ticketSize, isBoth]
   );
 
   const mMetrics = useMemo(
@@ -164,9 +190,11 @@ export default function CalculatorPage() {
       computeChannelMetrics(
         totalBudgetMonth * (effectiveMetaSplit / 100),
         meta,
-        ticketSize
+        ticketSize,
+        effectiveMetaSplit,
+        isBoth
       ),
-    [totalBudgetMonth, effectiveMetaSplit, meta, ticketSize]
+    [totalBudgetMonth, effectiveMetaSplit, meta, ticketSize, isBoth]
   );
 
   const totals = useMemo(() => {
@@ -205,23 +233,28 @@ export default function CalculatorPage() {
     };
   }, [gMetrics, mMetrics, totalBudgetMonth]);
 
-  // Best mix optimizer (between 20% and 80% when running Both)
+  // Best mix optimizer: tries every split from 0% to 100% in 5% steps
+  // (matching Claude Artifact specification)
   const bestMix = useMemo(() => {
     if (channelMode !== "both" || totalBudgetMonth <= 0) return null;
     let bestG = effectiveGoogleSplit;
     let bestCost = totals.costPerDisbursedLoan;
 
-    for (let g = 20; g <= 80; g += 10) {
+    for (let g = 0; g <= 100; g += 5) {
       const m = 100 - g;
       const gm = computeChannelMetrics(
         totalBudgetMonth * (g / 100),
         google,
-        ticketSize
+        ticketSize,
+        g,
+        true
       );
       const mm = computeChannelMetrics(
         totalBudgetMonth * (m / 100),
         meta,
-        ticketSize
+        ticketSize,
+        m,
+        true
       );
       const totalLoans = gm.loansDisbursed + mm.loansDisbursed;
       const cost = totalLoans > 0 ? totalBudgetMonth / totalLoans : Infinity;
@@ -232,7 +265,8 @@ export default function CalculatorPage() {
     }
 
     const savings = Math.round(totals.costPerDisbursedLoan - bestCost);
-    if (bestG === effectiveGoogleSplit || savings <= 0) return null;
+    // Hidden when current split is within 1 point of the best (matching spec):
+    if (Math.abs(bestG - effectiveGoogleSplit) <= 1 || savings <= 0) return null;
 
     return {
       googleSplit: bestG,
@@ -1046,7 +1080,17 @@ export default function CalculatorPage() {
               <h2 className="font-bold text-base">Benchmarks</h2>
               <button
                 type="button"
-                onClick={() => setBenchmarks(DEFAULT_BENCHMARKS)}
+                onClick={() => {
+                  setKnowMode("budget");
+                  setChannelMode("both");
+                  setPeriodMode("month");
+                  setBudgetMonth(1500000);
+                  setTicketSize(13419);
+                  setGoogleSplit(50);
+                  setGoogle(DEFAULT_GOOGLE);
+                  setMeta(DEFAULT_META);
+                  setBenchmarks(DEFAULT_BENCHMARKS);
+                }}
                 aria-label="Reset benchmarks"
                 className="w-8 h-8 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[#4ade80] flex items-center justify-center hover:bg-emerald-500/20 transition-colors cursor-pointer"
               >
