@@ -1057,9 +1057,9 @@ export default function CalculatorPage() {
           </div>
           </div>
 
-          {/* Summary Section */}
-          <section className={`rounded-2xl border p-5 sm:p-6 space-y-5 ${cardBg}`}>
-            <h2 className="font-bold text-base">Summary</h2>
+          {/* Summary Section (directly on page background, no card box) */}
+          <section className="pt-4 space-y-5">
+            <h2 className="text-lg font-bold">Summary</h2>
 
             <p className={`text-xs sm:text-sm leading-relaxed ${mutedText}`}>
               Spending{" "}
@@ -1239,9 +1239,9 @@ export default function CalculatorPage() {
             )}
           </section>
 
-          {/* Monthly Breakdown Table */}
-          <section className={`rounded-2xl border p-5 sm:p-6 ${cardBg}`}>
-            <h2 className="font-bold text-base mb-4">Monthly breakdown</h2>
+          {/* Monthly Breakdown Table (directly on page background, no card box) */}
+          <section className="pt-4">
+            <h2 className="text-lg font-bold mb-4">Monthly breakdown</h2>
             <div
               tabIndex={0}
               role="region"
