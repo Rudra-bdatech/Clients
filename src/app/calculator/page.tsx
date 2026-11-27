@@ -918,90 +918,88 @@ export default function CalculatorPage() {
             </section>
           )}
 
-          {/* Channel Comparison Cards (Single outer card matching artifact) */}
+          {/* Channel Comparison Cards: Two separate cards side-by-side matching artifact */}
           {channelMode === "both" && (
-            <section className={`rounded-2xl border p-4 sm:p-5 ${cardBg}`}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  {
-                    key: "google" as const,
-                    name: "Google Ads",
-                    dot: "bg-[#4ade80]",
-                    m: gMetrics,
-                  },
-                  {
-                    key: "meta" as const,
-                    name: "Meta Ads",
-                    dot: "bg-blue-400",
-                    m: mMetrics,
-                  },
-                ].map((ch) => {
-                  const diff = Math.abs(
-                    gMetrics.costPerDisbursedLoan - mMetrics.costPerDisbursedLoan
-                  );
-                  const isBest = lowerCostChannel === ch.key && diff > 5;
-                  return (
-                    <div
-                      key={ch.key}
-                      className={
-                        isBest
-                          ? "rounded-xl border border-emerald-500/60 p-3 sm:p-3.5 space-y-2 bg-emerald-500/5"
-                          : "p-3 space-y-2"
-                      }
-                    >
-                      <div className="flex items-center justify-between gap-1.5 pb-1">
-                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
-                          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${ch.dot}`} />
-                          <h3 className="font-bold text-sm sm:text-base whitespace-nowrap">{ch.name}</h3>
-                        </div>
-                        {isBest && (
-                          <span className="shrink-0 whitespace-nowrap px-2 sm:px-2.5 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] sm:text-[11px] font-bold">
-                            Lower cost per loan
-                          </span>
-                        )}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                {
+                  key: "google" as const,
+                  name: "Google Ads",
+                  dot: "bg-[#4ade80]",
+                  m: gMetrics,
+                },
+                {
+                  key: "meta" as const,
+                  name: "Meta Ads",
+                  dot: "bg-blue-400",
+                  m: mMetrics,
+                },
+              ].map((ch) => {
+                const diff = Math.abs(
+                  gMetrics.costPerDisbursedLoan - mMetrics.costPerDisbursedLoan
+                );
+                const isBest = lowerCostChannel === ch.key && diff > 5;
+                return (
+                  <div
+                    key={ch.key}
+                    className={`rounded-2xl border p-4 sm:p-5 space-y-2 ${cardBg} ${
+                      isBest
+                        ? "border-emerald-500/60 bg-emerald-500/5"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1.5 pb-1">
+                      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
+                        <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${ch.dot}`} />
+                        <h3 className="font-bold text-sm sm:text-base whitespace-nowrap">{ch.name}</h3>
                       </div>
-
-                      {[
-                        {
-                          label: "CPL",
-                          val: formatCurrency(
-                            ch.m.effectiveCpl,
-                            ch.m.effectiveCpl % 1 !== 0 ? 2 : 0
-                          ),
-                        },
-                        {
-                          label: "Cost per qualified lead",
-                          val: formatCurrency(
-                            Math.round(ch.m.costPerQualifiedLead)
-                          ),
-                        },
-                        {
-                          label: "Cost per disbursed loan",
-                          val: formatCurrency(
-                            Math.round(ch.m.costPerDisbursedLoan)
-                          ),
-                        },
-                        {
-                          label: "Loans",
-                          val: formatIN(Math.round(ch.m.loansDisbursed)),
-                        },
-                        {
-                          label: "Amount",
-                          val: formatINRCompact(ch.m.amountDisbursedMonth),
-                        },
-                      ].map((row) => (
-                        <div
-                          key={row.label}
-                          className="flex items-center justify-between text-xs sm:text-sm"
-                        >
-                          <span className={mutedText}>{row.label}</span>
-                          <span className="font-mono font-bold">{row.val}</span>
-                        </div>
-                      ))}
+                      {isBest && (
+                        <span className="shrink-0 whitespace-nowrap px-2 sm:px-2.5 py-0.5 rounded-full bg-[#4ade80] text-[#04101f] text-[10px] sm:text-[11px] font-bold">
+                          Lower cost per loan
+                        </span>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+
+                    {[
+                      {
+                        label: "CPL",
+                        val: formatCurrency(
+                          ch.m.effectiveCpl,
+                          ch.m.effectiveCpl % 1 !== 0 ? 2 : 0
+                        ),
+                      },
+                      {
+                        label: "Cost per qualified lead",
+                        val: formatCurrency(
+                          Math.round(ch.m.costPerQualifiedLead)
+                        ),
+                      },
+                      {
+                        label: "Cost per disbursed loan",
+                        val: formatCurrency(
+                          Math.round(ch.m.costPerDisbursedLoan)
+                        ),
+                      },
+                      {
+                        label: "Loans",
+                        val: formatIN(Math.round(ch.m.loansDisbursed)),
+                      },
+                      {
+                        label: "Amount",
+                        val: formatINRCompact(ch.m.amountDisbursedMonth),
+                      },
+                    ].map((row) => (
+                      <div
+                        key={row.label}
+                        className="flex items-center justify-between text-xs sm:text-sm"
+                      >
+                        <span className={mutedText}>{row.label}</span>
+                        <span className="font-mono font-bold">{row.val}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </section>
           )}
 
