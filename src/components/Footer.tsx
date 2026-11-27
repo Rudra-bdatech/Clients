@@ -28,6 +28,12 @@ export function Footer() {
             The Vault
           </Link>
           <Link
+            href="/calculator"
+            className="text-sm text-muted-foreground hover:text-mint transition-colors font-mono focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mint rounded-sm"
+          >
+            Calculator
+          </Link>
+          <Link
             href="/contact"
             className="text-sm text-muted-foreground hover:text-mint transition-colors font-mono focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mint rounded-sm"
           >
