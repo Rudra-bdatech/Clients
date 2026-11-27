@@ -244,15 +244,14 @@
   background: #4ade80;
 }
 
-/* ── Gauge slider: red or green left track (read-only visual) ── */
+/* ── Gauge slider: red or green left track (interactive — drags back-calculate disbursed%) ── */
 .calc-gauge {
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
   border-radius: 9999px;
   outline: none;
-  cursor: default;
-  pointer-events: none;
+  cursor: pointer;
   background: linear-gradient(
     to right,
     var(--gauge-color, #ef4444) 0%,
@@ -270,9 +269,11 @@
   background: hsl(var(--background));
   border: 2px solid #4ade80;
   box-shadow: 0 0 0 3px #4ade8030;
-  cursor: default;
-  pointer-events: none;
-  transition: left 0.3s ease;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+.calc-gauge::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 6px #4ade8050;
 }
 .calc-gauge::-moz-range-thumb {
   width: 20px;
@@ -281,8 +282,7 @@
   border-radius: 50%;
   background: hsl(var(--background));
   box-shadow: 0 0 0 3px #4ade8030;
-  cursor: default;
-  pointer-events: none;
+  cursor: pointer;
 }
 .calc-gauge::-moz-range-track {
   height: 6px;

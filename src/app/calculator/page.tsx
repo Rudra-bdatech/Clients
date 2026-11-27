@@ -568,7 +568,12 @@ export default function CalculatorPage() {
                       {field.label}
                     </label>
                     <div
-                      className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${inputBg}`}
+                      className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${
+                        field.key === "disbursedPct" &&
+                        google.disbursedPct > google.approvedPct
+                          ? "bg-red-500/10 border-red-500/50 text-foreground"
+                          : inputBg
+                      }`}
                     >
                       {field.prefix && (
                         <span className={`text-sm font-mono ${mutedText}`}>
@@ -601,6 +606,13 @@ export default function CalculatorPage() {
                 <p className={`text-[11px] italic ${mutedText}`}>
                   Placeholder, replace with your last 30 to 90 days of CRM data.
                 </p>
+                {(google.disbursedPct > google.approvedPct ||
+                  google.approvedPct > google.completedPct ||
+                  google.completedPct > 100) && (
+                  <p className="text-[11px] font-semibold text-red-400">
+                    Check the funnel: disbursed ≤ approved ≤ completed ≤ 100%.
+                  </p>
+                )}
               </div>
             )}
 
@@ -649,7 +661,12 @@ export default function CalculatorPage() {
                       {field.label}
                     </label>
                     <div
-                      className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${inputBg}`}
+                      className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 ${
+                        field.key === "disbursedPct" &&
+                        meta.disbursedPct > meta.approvedPct
+                          ? "bg-red-500/10 border-red-500/50 text-foreground"
+                          : inputBg
+                      }`}
                     >
                       {field.prefix && (
                         <span className={`text-sm font-mono ${mutedText}`}>
@@ -682,6 +699,13 @@ export default function CalculatorPage() {
                 <p className={`text-[11px] italic ${mutedText}`}>
                   Placeholder, replace with your last 30 to 90 days of CRM data.
                 </p>
+                {(meta.disbursedPct > meta.approvedPct ||
+                  meta.approvedPct > meta.completedPct ||
+                  meta.completedPct > 100) && (
+                  <p className="text-[11px] font-semibold text-red-400">
+                    Check the funnel: disbursed ≤ approved ≤ completed ≤ 100%.
+                  </p>
+                )}
               </div>
             )}
           </section>
@@ -739,15 +763,28 @@ export default function CalculatorPage() {
 
             <input
               type="range"
-              min={0}
+              min={0.5}
               max={20}
-              step={0.01}
-              value={Math.min(20, totals.disbursementPct)}
-              readOnly
-              aria-label="Disbursement % gauge"
+              step={0.1}
+              value={Math.min(20, Math.max(0.5, totals.disbursementPct))}
+              onChange={(e) => {
+                const newDisbPct = Number(e.target.value);
+                const currentDisbPct = totals.disbursementPct;
+                if (currentDisbPct <= 0) return;
+                const scale = currentDisbPct / newDisbPct;
+                setGoogle((prev) => ({
+                  ...prev,
+                  disbursedPct: Math.min(100, Math.max(0, parseFloat((prev.disbursedPct * scale).toFixed(2)))),
+                }));
+                setMeta((prev) => ({
+                  ...prev,
+                  disbursedPct: Math.min(100, Math.max(0, parseFloat((prev.disbursedPct * scale).toFixed(2)))),
+                }));
+              }}
+              aria-label="Disbursement % gauge — drag to adjust disbursed % of leads"
               className="calc-gauge w-full"
               style={{
-                "--gauge-pct": `${Math.min(100, (totals.disbursementPct / 20) * 100)}%`,
+                "--gauge-pct": `${Math.min(100, (Math.min(20, totals.disbursementPct) / 20) * 100)}%`,
                 "--gauge-color": isAboveBenchmark ? "#ef4444" : "#4ade80",
               } as React.CSSProperties}
             />
