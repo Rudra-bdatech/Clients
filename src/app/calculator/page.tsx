@@ -284,19 +284,19 @@ export default function CalculatorPage() {
       ? meta.cpl / ((meta.disbursedPct / 100) * benchRatio)
       : 0;
 
-  // Theme classes
+  // Theme classes harmonized with Clients.co.in design system
   const pageBg = dark
-    ? "bg-[#080d1a] text-white"
+    ? "bg-background text-foreground"
     : "bg-slate-50 text-slate-900";
   const cardBg = dark
-    ? "bg-[#101726] border-slate-800/80"
+    ? "bg-card border-border"
     : "bg-white border-slate-200 shadow-sm";
   const inputBg = dark
-    ? "bg-[#090e1a] border-slate-800 text-white"
+    ? "bg-secondary/70 border-border text-foreground"
     : "bg-slate-50 border-slate-300 text-slate-900";
-  const mutedText = dark ? "text-slate-400" : "text-slate-600";
+  const mutedText = dark ? "text-muted-foreground" : "text-slate-600";
   const subCardBg = dark
-    ? "bg-[#0c1220] border-slate-800"
+    ? "bg-secondary border-border"
     : "bg-slate-100 border-slate-200";
 
   const displayBudgetValue =
@@ -715,7 +715,7 @@ export default function CalculatorPage() {
           <section
             className={`rounded-2xl border p-5 sm:p-6 ${
               dark
-                ? "bg-gradient-to-br from-[#0e1c26] to-[#0f172a] border-emerald-500/25"
+                ? "bg-gradient-to-br from-card to-secondary/80 border-mint/25"
                 : "bg-emerald-50/70 border-emerald-200"
             }`}
           >
@@ -763,7 +763,7 @@ export default function CalculatorPage() {
               </span>
             </div>
 
-            <div className="relative h-2.5 rounded-full bg-slate-800/80 overflow-visible">
+            <div className="relative h-2.5 rounded-full bg-secondary overflow-visible">
               <div
                 className={`h-full rounded-full transition-all duration-300 ${
                   isAboveBenchmark ? "bg-red-500" : "bg-[#4ade80]"
@@ -771,7 +771,7 @@ export default function CalculatorPage() {
                 style={{ width: `${gaugeFillPct}%` }}
               />
               <div
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-[#080d1a] border-2 border-[#4ade80] transition-all duration-300"
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-background border-2 border-[#4ade80] transition-all duration-300"
                 style={{ left: `${gaugeFillPct}%` }}
               />
             </div>
@@ -1254,7 +1254,7 @@ export default function CalculatorPage() {
                 <thead>
                   <tr
                     className={`border-b ${
-                      dark ? "border-slate-800" : "border-slate-200"
+                      dark ? "border-border" : "border-slate-200"
                     }`}
                   >
                     <th className={`py-3 text-left font-medium ${mutedText}`}>
@@ -1275,7 +1275,7 @@ export default function CalculatorPage() {
                 </thead>
                 <tbody
                   className={`divide-y ${
-                    dark ? "divide-slate-800/70" : "divide-slate-200"
+                    dark ? "divide-border/70" : "divide-slate-200"
                   }`}
                 >
                   {[
@@ -1414,7 +1414,7 @@ export default function CalculatorPage() {
           <section
             className={`rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
               dark
-                ? "bg-gradient-to-br from-[#0e1c26] to-[#0f172a] border-emerald-500/25"
+                ? "bg-gradient-to-br from-card to-secondary/80 border-mint/25"
                 : "bg-emerald-50/70 border-emerald-200"
             }`}
           >
@@ -1439,7 +1439,7 @@ export default function CalculatorPage() {
           {/* Disclaimer */}
           <section
             className={`pt-6 border-t ${
-              dark ? "border-slate-800/80" : "border-slate-200"
+              dark ? "border-border" : "border-slate-200"
             }`}
           >
             <h3 className="text-xs font-bold mb-2">Disclaimer</h3>
