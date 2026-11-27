@@ -127,7 +127,7 @@ export default function CalculatorPage() {
   const [periodMode, setPeriodMode] = useState<PeriodMode>("month");
 
   const [budgetMonth, setBudgetMonth] = useState(1500000);
-  const [targetDisbursalMonth, setTargetDisbursalMonth] = useState(16346000);
+  const [targetDisbursalMonth, setTargetDisbursalMonth] = useState(10000000);
   const [ticketSize, setTicketSize] = useState(13419);
   const [googleSplit, setGoogleSplit] = useState(50);
 
@@ -438,30 +438,32 @@ export default function CalculatorPage() {
                     {knowMode === "budget" ? "Ad budget" : "Disbursal target"}
                   </h2>
 
-                  <div className={`inline-flex rounded-xl border p-1 ${subCardBg}`}>
-                    <button
-                      type="button"
-                      onClick={() => setPeriodMode("day")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                        periodMode === "day"
-                          ? "bg-[#4ade80] text-[#04101f]"
-                          : mutedText
-                      }`}
-                    >
-                      Per day
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPeriodMode("month")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                        periodMode === "month"
-                          ? "bg-[#4ade80] text-[#04101f]"
-                          : mutedText
-                      }`}
-                    >
-                      Per month
-                    </button>
-                  </div>
+                  {knowMode === "budget" && (
+                    <div className={`inline-flex rounded-xl border p-1 ${subCardBg}`}>
+                      <button
+                        type="button"
+                        onClick={() => setPeriodMode("day")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          periodMode === "day"
+                            ? "bg-[#4ade80] text-[#04101f]"
+                            : mutedText
+                        }`}
+                      >
+                        Per day
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPeriodMode("month")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          periodMode === "month"
+                            ? "bg-[#4ade80] text-[#04101f]"
+                            : mutedText
+                        }`}
+                      >
+                        Per month
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -471,7 +473,7 @@ export default function CalculatorPage() {
                   >
                     {knowMode === "budget"
                       ? `Budget per ${periodMode}`
-                      : `Target disbursal per ${periodMode}`}
+                      : "Amount to disburse per month"}
                   </label>
                   <div
                     className={`flex items-center justify-between rounded-xl px-4 py-3 ${inputBg}`}
@@ -484,31 +486,41 @@ export default function CalculatorPage() {
                       value={formatIN(
                         knowMode === "budget"
                           ? displayBudgetValue
-                          : displayTargetValue
+                          : Math.round(targetDisbursalMonth)
                       )}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/[^0-9]/g, "");
                         const val = Math.max(0, Number(raw) || 0);
-                        const monthly =
-                          periodMode === "month" ? val : val * DAYS_PER_MONTH;
                         if (knowMode === "budget") {
+                          const monthly =
+                            periodMode === "month" ? val : val * DAYS_PER_MONTH;
                           setBudgetMonth(monthly);
                         } else {
-                          setTargetDisbursalMonth(monthly);
+                          setTargetDisbursalMonth(val);
                         }
                       }}
                       className="w-full bg-transparent text-right font-mono font-bold text-base focus:outline-none"
                     />
                   </div>
-                  <p className="mt-2 text-xs font-bold">
-                    {knowMode === "budget"
-                      ? periodMode === "month"
+                  {knowMode === "budget" ? (
+                    <p className="mt-2 text-xs font-bold">
+                      {periodMode === "month"
                         ? `= ${formatCurrency(budgetMonth / DAYS_PER_MONTH)} per day`
-                        : `= ${formatCurrency(budgetMonth)} per month`
-                      : periodMode === "month"
-                        ? `= ${formatINRCompact(targetDisbursalMonth / DAYS_PER_MONTH)} per day`
-                        : `= ${formatINRCompact(targetDisbursalMonth)} per month`}
-                  </p>
+                        : `= ${formatCurrency(budgetMonth)} per month`}
+                    </p>
+                  ) : (
+                    <p className={`mt-2 text-xs ${mutedText}`}>
+                      About{" "}
+                      {formatIN(
+                        Math.round(
+                          ticketSize > 0
+                            ? targetDisbursalMonth / ticketSize
+                            : 0
+                        )
+                      )}{" "}
+                      loans a month.
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -1088,6 +1100,7 @@ export default function CalculatorPage() {
                   setChannelMode("both");
                   setPeriodMode("month");
                   setBudgetMonth(1500000);
+                  setTargetDisbursalMonth(10000000);
                   setTicketSize(13419);
                   setGoogleSplit(50);
                   setGoogle(DEFAULT_GOOGLE);
