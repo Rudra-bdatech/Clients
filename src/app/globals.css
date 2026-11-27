@@ -169,3 +169,104 @@
     animation: dotPulse 2s ease-in-out infinite;
   }
 }
+
+/* ── Calculator range slider: green-filled left track ── */
+.calc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    #4ade80 0%,
+    #4ade80 var(--slider-pct, 50%),
+    hsl(var(--secondary)) var(--slider-pct, 50%),
+    hsl(var(--secondary)) 100%
+  );
+}
+.calc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 5px #4ade8060;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+.calc-slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 7px #4ade8080;
+}
+.calc-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 3px hsl(var(--background)), 0 0 0 5px #4ade8060;
+  cursor: pointer;
+}
+.calc-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--secondary));
+}
+.calc-slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 9999px;
+  background: #4ade80;
+}
+
+/* ── Gauge slider: red or green left track (read-only visual) ── */
+.calc-gauge {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: default;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    var(--gauge-color, #ef4444) 0%,
+    var(--gauge-color, #ef4444) var(--gauge-pct, 50%),
+    hsl(var(--secondary)) var(--gauge-pct, 50%),
+    hsl(var(--secondary)) 100%
+  );
+}
+.calc-gauge::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: hsl(var(--background));
+  border: 2px solid #4ade80;
+  box-shadow: 0 0 0 3px #4ade8030;
+  cursor: default;
+  pointer-events: none;
+  transition: left 0.3s ease;
+}
+.calc-gauge::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #4ade80;
+  border-radius: 50%;
+  background: hsl(var(--background));
+  box-shadow: 0 0 0 3px #4ade8030;
+  cursor: default;
+  pointer-events: none;
+}
+.calc-gauge::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: hsl(var(--secondary));
+}
+.calc-gauge::-moz-range-progress {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--gauge-color, #ef4444);
+}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Moon, RotateCcw, Sun } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
@@ -105,7 +105,6 @@ function computeChannelMetrics(budgetMonth: number, ch: ChannelInputs, ticketSiz
 }
 
 export default function CalculatorPage() {
-  const [dark, setDark] = useState(true);
   const [knowMode, setKnowMode] = useState<KnowMode>("budget");
   const [channelMode, setChannelMode] = useState<ChannelMode>("both");
   const [periodMode, setPeriodMode] = useState<PeriodMode>("month");
@@ -257,7 +256,7 @@ export default function CalculatorPage() {
         : "meta";
 
   const isAboveBenchmark = totals.disbursementPct > benchmarks.disbursementPct;
-  const gaugeFillPct = Math.min(100, (totals.disbursementPct / 18) * 100);
+
 
   const maxChartValue = Math.max(
     1,
@@ -284,20 +283,12 @@ export default function CalculatorPage() {
       ? meta.cpl / ((meta.disbursedPct / 100) * benchRatio)
       : 0;
 
-  // Theme classes harmonized with Clients.co.in design system
-  const pageBg = dark
-    ? "bg-background text-foreground"
-    : "bg-slate-50 text-slate-900";
-  const cardBg = dark
-    ? "bg-card border-border"
-    : "bg-white border-slate-200 shadow-sm";
-  const inputBg = dark
-    ? "bg-secondary/70 border-border text-foreground"
-    : "bg-slate-50 border-slate-300 text-slate-900";
-  const mutedText = dark ? "text-muted-foreground" : "text-slate-600";
-  const subCardBg = dark
-    ? "bg-secondary border-border"
-    : "bg-slate-100 border-slate-200";
+  // Theme classes — static design tokens (global theme handled by Navbar toggle)
+  const pageBg = "bg-background text-foreground";
+  const cardBg = "bg-card border-border";
+  const inputBg = "bg-secondary/70 border-border text-foreground";
+  const mutedText = "text-muted-foreground";
+  const subCardBg = "bg-secondary border-border";
 
   const displayBudgetValue =
     periodMode === "month"
@@ -313,31 +304,17 @@ export default function CalculatorPage() {
       <Navbar />
 
       <main className="relative flex-1 pt-24 pb-20 px-4 sm:px-6">
-        {dark && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-10 left-1/2 -translate-x-1/2 w-[520px] h-[260px] bg-emerald-400/10 rounded-full blur-3xl"
-          />
-        )}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-10 left-1/2 -translate-x-1/2 w-[520px] h-[260px] bg-emerald-400/10 rounded-full blur-3xl"
+        />
 
         <div className="relative z-10 max-w-6xl mx-auto space-y-6">
           {/* Header */}
           <div className="relative flex items-center justify-center pt-2 pb-1">
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-center pr-12 sm:pr-0">
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-center">
               NBFC Ads &amp; Disbursal Calculator
             </h1>
-            <button
-              type="button"
-              onClick={() => setDark((prev) => !prev)}
-              aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-              className={`absolute right-0 w-10 h-10 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${cardBg} hover:border-emerald-400/50`}
-            >
-              {dark ? (
-                <Sun className="w-4 h-4 text-slate-200" aria-hidden="true" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-700" aria-hidden="true" />
-              )}
-            </button>
           </div>
 
           {/* Top Controls Row (Centered) */}
@@ -527,7 +504,8 @@ export default function CalculatorPage() {
                       step={5}
                       value={googleSplit}
                       onChange={(e) => setGoogleSplit(Number(e.target.value))}
-                      className="w-full accent-[#4ade80] cursor-pointer"
+                      className="calc-slider w-full"
+                      style={{ "--slider-pct": `${((googleSplit - 10) / 80) * 100}%` } as React.CSSProperties}
                     />
                     <div className="flex items-center justify-between text-xs font-bold mt-2">
                       <span>Google {googleSplit}%</span>
@@ -601,7 +579,7 @@ export default function CalculatorPage() {
                         id={field.id}
                         type="number"
                         min={0}
-                        step={1}
+                        step={field.suffix === "%" ? 0.01 : 1}
                         value={field.value}
                         onChange={(e) =>
                           setGoogle((prev) => ({
@@ -682,7 +660,7 @@ export default function CalculatorPage() {
                         id={field.id}
                         type="number"
                         min={0}
-                        step={1}
+                        step={field.suffix === "%" ? 0.01 : 1}
                         value={field.value}
                         onChange={(e) =>
                           setMeta((prev) => ({
@@ -713,11 +691,7 @@ export default function CalculatorPage() {
           <div className="space-y-4">
           {/* Hero Output Card */}
           <section
-            className={`rounded-2xl border p-5 sm:p-6 ${
-              dark
-                ? "bg-gradient-to-br from-card to-secondary/80 border-mint/25"
-                : "bg-emerald-50/70 border-emerald-200"
-            }`}
+            className="rounded-2xl border p-5 sm:p-6 bg-gradient-to-br from-card to-secondary/80 border-mint/25"
           >
             <p className={`text-xs sm:text-sm mb-1.5 ${mutedText}`}>
               {knowMode === "budget"
@@ -763,18 +737,20 @@ export default function CalculatorPage() {
               </span>
             </div>
 
-            <div className="relative h-2.5 rounded-full bg-secondary overflow-visible">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  isAboveBenchmark ? "bg-red-500" : "bg-[#4ade80]"
-                }`}
-                style={{ width: `${gaugeFillPct}%` }}
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-background border-2 border-[#4ade80] transition-all duration-300"
-                style={{ left: `${gaugeFillPct}%` }}
-              />
-            </div>
+            <input
+              type="range"
+              min={0}
+              max={20}
+              step={0.01}
+              value={Math.min(20, totals.disbursementPct)}
+              readOnly
+              aria-label="Disbursement % gauge"
+              className="calc-gauge w-full"
+              style={{
+                "--gauge-pct": `${Math.min(100, (totals.disbursementPct / 20) * 100)}%`,
+                "--gauge-color": isAboveBenchmark ? "#ef4444" : "#4ade80",
+              } as React.CSSProperties}
+            />
           </section>
 
           {/* 6 KPI Stat Cards */}
@@ -1065,7 +1041,7 @@ export default function CalculatorPage() {
 
             <p className={`text-xs sm:text-sm leading-relaxed ${mutedText}`}>
               Spending{" "}
-              <strong className={dark ? "text-white" : "text-slate-900"}>
+              <strong className="text-foreground">
                 {formatCurrency(Math.round(totals.budgetDay))}
               </strong>{" "}
               a day ({formatINRCompact(totals.budgetMonth)} a month) disburses
@@ -1074,14 +1050,14 @@ export default function CalculatorPage() {
                 {formatINRCompact(totals.amountDisbursedMonth)}
               </strong>{" "}
               a month across{" "}
-              <strong className={dark ? "text-white" : "text-slate-900"}>
+              <strong className="text-foreground">
                 {formatIN(Math.round(totals.loansDisbursed))} loans
               </strong>{" "}
               at an average ticket of {formatCurrency(ticketSize)}.{" "}
               {channelMode === "both" &&
                 `Split: Google ${effectiveGoogleSplit}% / Meta ${effectiveMetaSplit}%. `}
               Overall cost per disbursed loan is{" "}
-              <strong className={dark ? "text-white" : "text-slate-900"}>
+              <strong className="text-foreground">
                 {formatCurrency(Math.round(totals.costPerDisbursedLoan))}
               </strong>
               , disbursement %{" "}
@@ -1253,9 +1229,7 @@ export default function CalculatorPage() {
               <table className="w-full min-w-[540px] text-xs sm:text-sm">
                 <thead>
                   <tr
-                    className={`border-b ${
-                      dark ? "border-border" : "border-slate-200"
-                    }`}
+                    className="border-b border-border"
                   >
                     <th className={`py-3 text-left font-medium ${mutedText}`}>
                       Metric
@@ -1274,9 +1248,7 @@ export default function CalculatorPage() {
                   </tr>
                 </thead>
                 <tbody
-                  className={`divide-y ${
-                    dark ? "divide-border/70" : "divide-slate-200"
-                  }`}
+                  className="divide-y divide-border/70"
                 >
                   {[
                     {
@@ -1412,11 +1384,7 @@ export default function CalculatorPage() {
 
           {/* Bottom CTA Card */}
           <section
-            className={`rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
-              dark
-                ? "bg-gradient-to-br from-card to-secondary/80 border-mint/25"
-                : "bg-emerald-50/70 border-emerald-200"
-            }`}
+            className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-br from-card to-secondary/80 border-mint/25"
           >
             <div>
               <h2 className="text-lg sm:text-xl font-bold mb-1">
@@ -1438,9 +1406,7 @@ export default function CalculatorPage() {
 
           {/* Disclaimer */}
           <section
-            className={`pt-6 border-t ${
-              dark ? "border-border" : "border-slate-200"
-            }`}
+            className="pt-6 border-t border-border"
           >
             <h3 className="text-xs font-bold mb-2">Disclaimer</h3>
             <p className={`text-xs leading-relaxed ${mutedText}`}>
